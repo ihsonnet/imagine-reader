@@ -1,0 +1,24 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Node
+node_modules/
+
+# Secrets and local data: never commit API keys or uploaded books
+.env
+.env.*
+!.env.example
+data/
+
+# Generated from pdfjs-dist at build time
+reader/public/pdfjs/
+
+# TypeScript build state
+*.tsbuildinfo
