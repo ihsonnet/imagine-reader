@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "imagine-reader-engine"
+version = "0.1.0.dev0"
+description = "Reusable engine for Imagine-Reader: PDF ingestion, source mapping, and playback planning"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "pdfplumber>=0.11.10,<0.12",
+    "fonttools>=4.50,<5",  # letters for small capitals a PDF leaves without text
+    "uharfbuzz>=0.50,<1",  # Bangla from Google Docs, read back by shaping its syllables
+    "pydantic>=2.13,<3",
+    "spacy>=3.8,<3.9",
+    "pillow>=11",
+    "httpx>=0.28",
+    "lameenc>=1.7",  # MP3 from Gemini's WAV narration (LGPL, used as a library)
+]
+
+[project.urls]
+Homepage = "https://imagine-reader.ihsonnet.com"
+Source = "https://github.com/ihsonnet/imagine-reader"
+Issues = "https://github.com/ihsonnet/imagine-reader/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9",
+    "reportlab>=5",
+    "ruff>=0.16",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/imagine_reader"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
