@@ -1,0 +1,648 @@
+{
+ "variant": {
+  "name": "cropped",
+  "visible_size": [
+   540,
+   720
+  ],
+  "columns": 1,
+  "font_size": 13,
+  "leading": 18,
+  "margin": 54,
+  "gutter": 0,
+  "indent": 18,
+  "rotate": 0,
+  "crop_inset": 36,
+  "header_on_first_page": true,
+  "book_style": false,
+  "bottom_margin": null
+ },
+ "story": "stories/the-lantern-keeper.txt",
+ "page_count": 2,
+ "paragraphs": [
+  "The Lantern Keeper",
+  "Every evening, just before the sun slipped behind the hills, old Mr. Hale climbed the stone steps of the lighthouse at Gull Point. He carried a brass lantern in one hand and a tin of matches in the other, and he counted the steps aloud as he went. There were one hundred and twelve of them. He had never once counted wrong.",
+  "Nora watched him from the bottom of the stairs. She was eleven years old, and she had come to live with her grandfather at the beginning of the summer, when her mother took a job in the city. At first the lighthouse had seemed lonely and enormous. Now it felt like a castle that belonged to the two of them.",
+  "“Why do you count?” she asked one evening.",
+  "“So that I always know where I am,” said Mr. Hale. “On a dark night, a man can lose his way even on his own staircase.”",
+  "“But you have the lantern.”",
+  "“A lantern shows you the next step,” he said. “Counting tells you how far you have come.”",
+  "Nora thought about that for a long time. She thought about it while she dried the supper dishes, and while she listened to the waves pulling at the rocks below the window, and while she lay awake under the heavy wool blanket that smelled faintly of salt.",
+  "In August a storm arrived. It came quickly, the way storms sometimes do at the edge of the sea, with a wind that rattled the shutters and a rain that fell sideways. Mr. Hale had gone to the village that afternoon to buy oil and bread, and he had not come back.",
+  "Nora stood at the kitchen window and waited. The clock on the shelf ticked past six, then seven. The sky turned the color of a bruise. Somewhere out on the water, she knew, the fishing boats were hurrying home, and the fishermen would be searching the darkness for the light at Gull Point.",
+  "But the light was not lit.",
+  "She found the brass lantern on its hook by the door. Her hands shook as she struck the first match, and the wind blew it out. The second match broke. The third one caught, and a small, steady flame bloomed inside the glass.",
+  "Then she began to climb.",
+  "“One,” she whispered. “Two. Three.”",
+  "The stairwell was black except for the circle of light around her feet. The walls trembled with every gust of wind. At the fortieth step she wanted to turn back. At the seventy-fifth step she stopped to catch her breath and heard the sea roaring like an animal below her. But she kept counting, because counting told her how far she had come, and how far she still had to go.",
+  "At the one hundred and twelfth step she pushed open the hatch and climbed into the lamp room. The great lens stood in the middle of the room like a giant glass beehive. Nora had watched her grandfather light it a dozen times. She opened the little door at its base, turned the valve the way he always did, and held her lantern to the wick.",
+  "For a moment nothing happened. Then the flame caught, and the lens gathered it up and threw it out across the water in a long, bright beam that swept around and around through the rain.",
+  "Far below, a horn sounded. Then another. One by one, the fishing boats turned toward the harbor.",
+  "Mr. Hale came home just after midnight, soaked to the skin. A fallen tree had blocked the road, and he had walked the last three miles in the storm. When he saw the beam turning above the cliffs, he stood still in the rain and laughed out loud.",
+  "He found Nora asleep at the top of the stairs, her lantern still burning beside her.",
+  "“How did you find your way?” he asked her the next morning.",
+  "Nora smiled. “I counted,” she said. “One hundred and twelve.”"
+ ],
+ "lines": [
+  {
+   "page": 1,
+   "role": "title",
+   "paragraph": 0,
+   "text": "The Lantern Keeper",
+   "x0": 0.35372,
+   "x1": 0.64628,
+   "baseline": 0.1,
+   "size": 0.025
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 1,
+   "text": "Every evening, just before the sun slipped behind the hills, old Mr. Hale climbed",
+   "x0": 0.1,
+   "x1": 0.87831,
+   "baseline": 0.15139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 1,
+   "text": "the stone steps of the lighthouse at Gull Point. He carried a brass lantern in one",
+   "x0": 0.1,
+   "x1": 0.86091,
+   "baseline": 0.17639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 1,
+   "text": "hand and a tin of matches in the other, and he counted the steps aloud as he went.",
+   "x0": 0.1,
+   "x1": 0.88294,
+   "baseline": 0.20139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 1,
+   "text": "There were one hundred and twelve of them. He had never once counted wrong.",
+   "x0": 0.1,
+   "x1": 0.87348,
+   "baseline": 0.22639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 2,
+   "text": "Nora watched him from the bottom of the stairs. She was eleven years old, and",
+   "x0": 0.13333,
+   "x1": 0.89287,
+   "baseline": 0.25139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 2,
+   "text": "she had come to live with her grandfather at the beginning of the summer, when",
+   "x0": 0.1,
+   "x1": 0.8709,
+   "baseline": 0.27639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 2,
+   "text": "her mother took a job in the city. At first the lighthouse had seemed lonely and",
+   "x0": 0.1,
+   "x1": 0.85826,
+   "baseline": 0.30139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 2,
+   "text": "enormous. Now it felt like a castle that belonged to the two of them.",
+   "x0": 0.1,
+   "x1": 0.75595,
+   "baseline": 0.32639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 3,
+   "text": "“Why do you count?” she asked one evening.",
+   "x0": 0.13333,
+   "x1": 0.57191,
+   "baseline": 0.35139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 4,
+   "text": "“So that I always know where I am,” said Mr. Hale. “On a dark night, a man",
+   "x0": 0.13333,
+   "x1": 0.8701,
+   "baseline": 0.37639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 4,
+   "text": "can lose his way even on his own staircase.”",
+   "x0": 0.1,
+   "x1": 0.52722,
+   "baseline": 0.40139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 5,
+   "text": "“But you have the lantern.”",
+   "x0": 0.13333,
+   "x1": 0.39743,
+   "baseline": 0.42639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 6,
+   "text": "“A lantern shows you the next step,” he said. “Counting tells you how far you",
+   "x0": 0.13333,
+   "x1": 0.88355,
+   "baseline": 0.45139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 6,
+   "text": "have come.”",
+   "x0": 0.1,
+   "x1": 0.22032,
+   "baseline": 0.47639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 7,
+   "text": "Nora thought about that for a long time. She thought about it while she dried",
+   "x0": 0.13333,
+   "x1": 0.87089,
+   "baseline": 0.50139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 7,
+   "text": "the supper dishes, and while she listened to the waves pulling at the rocks below",
+   "x0": 0.1,
+   "x1": 0.87362,
+   "baseline": 0.52639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 7,
+   "text": "the window, and while she lay awake under the heavy wool blanket that smelled",
+   "x0": 0.1,
+   "x1": 0.87425,
+   "baseline": 0.55139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 7,
+   "text": "faintly of salt.",
+   "x0": 0.1,
+   "x1": 0.23441,
+   "baseline": 0.57639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 8,
+   "text": "In August a storm arrived. It came quickly, the way storms sometimes do at the",
+   "x0": 0.13333,
+   "x1": 0.89826,
+   "baseline": 0.60139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 8,
+   "text": "edge of the sea, with a wind that rattled the shutters and a rain that fell sideways.",
+   "x0": 0.1,
+   "x1": 0.87692,
+   "baseline": 0.62639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 8,
+   "text": "Mr. Hale had gone to the village that afternoon to buy oil and bread, and he had",
+   "x0": 0.1,
+   "x1": 0.86755,
+   "baseline": 0.65139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 8,
+   "text": "not come back.",
+   "x0": 0.1,
+   "x1": 0.24642,
+   "baseline": 0.67639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 9,
+   "text": "Nora stood at the kitchen window and waited. The clock on the shelf ticked",
+   "x0": 0.13333,
+   "x1": 0.86078,
+   "baseline": 0.70139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 9,
+   "text": "past six, then seven. The sky turned the color of a bruise. Somewhere out on the",
+   "x0": 0.1,
+   "x1": 0.87025,
+   "baseline": 0.72639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 9,
+   "text": "water, she knew, the fishing boats were hurrying home, and the fishermen would",
+   "x0": 0.1,
+   "x1": 0.87892,
+   "baseline": 0.75139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 9,
+   "text": "be searching the darkness for the light at Gull Point.",
+   "x0": 0.1,
+   "x1": 0.60149,
+   "baseline": 0.77639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 10,
+   "text": "But the light was not lit.",
+   "x0": 0.13333,
+   "x1": 0.36608,
+   "baseline": 0.80139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 11,
+   "text": "She found the brass lantern on its hook by the door. Her hands shook as she",
+   "x0": 0.13333,
+   "x1": 0.86215,
+   "baseline": 0.82639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 11,
+   "text": "struck the first match, and the wind blew it out. The second match broke. The third",
+   "x0": 0.1,
+   "x1": 0.89834,
+   "baseline": 0.85139,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 11,
+   "text": "one caught, and a small, steady flame bloomed inside the glass.",
+   "x0": 0.1,
+   "x1": 0.71047,
+   "baseline": 0.87639,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "body",
+   "paragraph": 12,
+   "text": "Then she began to climb.",
+   "x0": 0.13333,
+   "x1": 0.37605,
+   "baseline": 0.90139,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 13,
+   "text": "“One,” she whispered. “Two. Three.”",
+   "x0": 0.13333,
+   "x1": 0.49565,
+   "baseline": 0.09306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 14,
+   "text": "The stairwell was black except for the circle of light around her feet. The walls",
+   "x0": 0.13333,
+   "x1": 0.89347,
+   "baseline": 0.11806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 14,
+   "text": "trembled with every gust of wind. At the fortieth step she wanted to turn back. At",
+   "x0": 0.1,
+   "x1": 0.88431,
+   "baseline": 0.14306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 14,
+   "text": "the seventy-fifth step she stopped to catch her breath and heard the sea roaring like",
+   "x0": 0.1,
+   "x1": 0.89692,
+   "baseline": 0.16806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 14,
+   "text": "an animal below her. But she kept counting, because counting told her how far she",
+   "x0": 0.1,
+   "x1": 0.89565,
+   "baseline": 0.19306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 14,
+   "text": "had come, and how far she still had to go.",
+   "x0": 0.1,
+   "x1": 0.50184,
+   "baseline": 0.21806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 15,
+   "text": "At the one hundred and twelfth step she pushed open the hatch and climbed",
+   "x0": 0.13333,
+   "x1": 0.86145,
+   "baseline": 0.24306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 15,
+   "text": "into the lamp room. The great lens stood in the middle of the room like a giant",
+   "x0": 0.1,
+   "x1": 0.85494,
+   "baseline": 0.26806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 15,
+   "text": "glass beehive. Nora had watched her grandfather light it a dozen times. She",
+   "x0": 0.1,
+   "x1": 0.82607,
+   "baseline": 0.29306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 15,
+   "text": "opened the little door at its base, turned the valve the way he always did, and held",
+   "x0": 0.1,
+   "x1": 0.88763,
+   "baseline": 0.31806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 15,
+   "text": "her lantern to the wick.",
+   "x0": 0.1,
+   "x1": 0.32264,
+   "baseline": 0.34306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 16,
+   "text": "For a moment nothing happened. Then the flame caught, and the lens gathered",
+   "x0": 0.13333,
+   "x1": 0.8902,
+   "baseline": 0.36806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 16,
+   "text": "it up and threw it out across the water in a long, bright beam that swept around and",
+   "x0": 0.1,
+   "x1": 0.89834,
+   "baseline": 0.39306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 16,
+   "text": "around through the rain.",
+   "x0": 0.1,
+   "x1": 0.33268,
+   "baseline": 0.41806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 17,
+   "text": "Far below, a horn sounded. Then another. One by one, the fishing boats turned",
+   "x0": 0.13333,
+   "x1": 0.89087,
+   "baseline": 0.44306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 17,
+   "text": "toward the harbor.",
+   "x0": 0.1,
+   "x1": 0.27716,
+   "baseline": 0.46806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 18,
+   "text": "Mr. Hale came home just after midnight, soaked to the skin. A fallen tree had",
+   "x0": 0.13333,
+   "x1": 0.87884,
+   "baseline": 0.49306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 18,
+   "text": "blocked the road, and he had walked the last three miles in the storm. When he",
+   "x0": 0.1,
+   "x1": 0.85886,
+   "baseline": 0.51806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 18,
+   "text": "saw the beam turning above the cliffs, he stood still in the rain and laughed out",
+   "x0": 0.1,
+   "x1": 0.85959,
+   "baseline": 0.54306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 18,
+   "text": "loud.",
+   "x0": 0.1,
+   "x1": 0.14882,
+   "baseline": 0.56806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 19,
+   "text": "He found Nora asleep at the top of the stairs, her lantern still burning beside",
+   "x0": 0.13333,
+   "x1": 0.86413,
+   "baseline": 0.59306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 19,
+   "text": "her.",
+   "x0": 0.1,
+   "x1": 0.13676,
+   "baseline": 0.61806,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 20,
+   "text": "“How did you find your way?” he asked her the next morning.",
+   "x0": 0.13333,
+   "x1": 0.73506,
+   "baseline": 0.64306,
+   "size": 0.01806
+  },
+  {
+   "page": 2,
+   "role": "body",
+   "paragraph": 21,
+   "text": "Nora smiled. “I counted,” she said. “One hundred and twelve.”",
+   "x0": 0.13333,
+   "x1": 0.73971,
+   "baseline": 0.66806,
+   "size": 0.01806
+  },
+  {
+   "page": 1,
+   "role": "header",
+   "paragraph": null,
+   "text": "The Lantern Keeper",
+   "x0": 0.43288,
+   "x1": 0.56712,
+   "baseline": 0.0375,
+   "size": 0.0125
+  },
+  {
+   "page": 1,
+   "role": "page_number",
+   "paragraph": null,
+   "text": "1",
+   "x0": 0.49583,
+   "x1": 0.50417,
+   "baseline": 0.975,
+   "size": 0.0125
+  },
+  {
+   "page": 2,
+   "role": "header",
+   "paragraph": null,
+   "text": "The Lantern Keeper",
+   "x0": 0.43288,
+   "x1": 0.56712,
+   "baseline": 0.0375,
+   "size": 0.0125
+  },
+  {
+   "page": 2,
+   "role": "page_number",
+   "paragraph": null,
+   "text": "2",
+   "x0": 0.49583,
+   "x1": 0.50417,
+   "baseline": 0.975,
+   "size": 0.0125
+  }
+ ]
+}
