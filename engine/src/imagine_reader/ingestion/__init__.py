@@ -8,6 +8,7 @@ from .errors import (
     NotAPdfError,
     ScannedPdfError,
 )
+from .front_matter import story_start
 from .models import ExtractedDocument
 from .pdf import EXTRACTOR_VERSION, Limits, ingest_pdf
 
@@ -22,4 +23,5 @@ __all__ = [
     "NotAPdfError",
     "ScannedPdfError",
     "ingest_pdf",
+    "story_start",
 ]
