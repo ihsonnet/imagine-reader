@@ -2,6 +2,7 @@
 
 from .audio import measure_duration, mp3_duration
 from .checking import ClipChecker, misplaced_breaks
+from .gemini import GeminiSentenceTimer, GeminiSpeechProvider, ProviderQuotaExhausted
 from .image import REFERENCE_SIZE, ImageProvider, MockImageProvider, Picture, Reference
 from .mock import MockSpeechProvider
 from .openai import (
@@ -18,6 +19,8 @@ from .speech import Speech, SpeechProvider, wav_duration
 __all__ = [
     "REFERENCE_SIZE",
     "ClipChecker",
+    "GeminiSentenceTimer",
+    "GeminiSpeechProvider",
     "ImageProvider",
     "MockImageProvider",
     "MockSpeechProvider",
@@ -28,6 +31,7 @@ __all__ = [
     "Picture",
     "ProviderAccountError",
     "ProviderBusy",
+    "ProviderQuotaExhausted",
     "ProviderRefused",
     "Reference",
     "Speech",
