@@ -2,6 +2,7 @@
 
 from .audio import measure_duration, mp3_duration
 from .checking import ClipChecker, misplaced_breaks
+from .cloudflare import CloudflareImageProvider
 from .gemini import GeminiSentenceTimer, GeminiSpeechProvider, ProviderQuotaExhausted
 from .image import REFERENCE_SIZE, ImageProvider, MockImageProvider, Picture, Reference
 from .mock import MockSpeechProvider
@@ -19,6 +20,7 @@ from .speech import Speech, SpeechProvider, wav_duration
 __all__ = [
     "REFERENCE_SIZE",
     "ClipChecker",
+    "CloudflareImageProvider",
     "GeminiSentenceTimer",
     "GeminiSpeechProvider",
     "ImageProvider",
