@@ -15,6 +15,13 @@ from .openai import (
     ProviderBusy,
     ProviderRefused,
 )
+from .openrouter import (
+    OpenRouterImageProvider,
+    OpenRouterSentenceTimer,
+    OpenRouterSpeechProvider,
+    OpenRouterTextModel,
+    OpenRouterTranscriber,
+)
 from .speech import Speech, SpeechProvider, wav_duration
 
 __all__ = [
@@ -30,6 +37,11 @@ __all__ = [
     "OpenAISpeechProvider",
     "OpenAITextModel",
     "OpenAITranscriber",
+    "OpenRouterImageProvider",
+    "OpenRouterSentenceTimer",
+    "OpenRouterSpeechProvider",
+    "OpenRouterTextModel",
+    "OpenRouterTranscriber",
     "Picture",
     "ProviderAccountError",
     "ProviderBusy",
