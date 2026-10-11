@@ -18,6 +18,7 @@ from .models import (
     Thing,
 )
 from .sketching import InvalidScenePlan, check_scene_plan, reference_spec, restyle, sketch_spec, visible_bible
+from .storyboard import StoryboardStoryBrain
 from .text import sections_from_document
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "SketchSpec",
     "StoryBible",
     "StoryBrain",
+    "StoryboardStoryBrain",
     "TextModel",
     "Thing",
     "bible_from_cast",
