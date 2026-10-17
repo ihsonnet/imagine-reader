@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "imagine-reader-server"
+version = "0.1.0.dev0"
+description = "Self-hosted API and background worker for the Imagine-Reader reference reader"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "imagine-reader-engine",
+    "fastapi>=0.142,<1",
+    "uvicorn>=0.54,<1",
+    "python-multipart>=0.0.32",
+    "sqlalchemy>=2.1,<2.2",
+    "alembic>=1.20,<2",
+    "pydantic-settings>=2.15,<3",
+    "pyjwt[crypto]>=2.10",  # checks Google's sign-in tokens
+]
+
+[project.urls]
+Homepage = "https://imagine-reader.ihsonnet.com"
+Source = "https://github.com/ihsonnet/imagine-reader"
+Issues = "https://github.com/ihsonnet/imagine-reader/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=9", "httpx2>=2.13"]  # Starlette's TestClient
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/imagine_reader_server"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
