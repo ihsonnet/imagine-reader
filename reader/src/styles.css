@@ -1,0 +1,2627 @@
+/*
+ * Pencil and page: cool sketch-paper greys, graphite text, fountain-pen ink for
+ * actions, and a real highlighter yellow used only for the sentence being read.
+ * Literata for reading, Atkinson Hyperlegible for controls, Caveat for the few
+ * pencil notes in the margins.
+ */
+
+:root {
+  --paper: #eef1ef;
+  --sheet: #fbfbf8;
+  --desk: #e1e6e3;
+  --graphite: #24262b;
+  --pencil: #5f636c;
+  --rule: #cdd3d0;
+  --ink: #2e3c8c;
+  --ink-strong: #232f70;
+  --on-ink: #ffffff;
+  --marker: #ffe94d;
+  --marker-text: inherit;
+  --marker-page: rgba(255, 214, 0, 0.42);
+  --sketch-line: #3b3f48;
+  --error: #a1261b;
+  --shadow: 0 1px 2px rgba(36, 38, 43, 0.08), 0 8px 24px rgba(36, 38, 43, 0.08);
+
+  --reading: "Literata Variable", "Noto Serif Bengali", Georgia, "Times New Roman", serif;
+  --ui: "Atkinson Hyperlegible", "Noto Serif Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pencil-hand: "Caveat", "Segoe Print", cursive;
+
+  color-scheme: light;
+  font-family: var(--ui);
+  color: var(--graphite);
+  background: var(--paper);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14171d;
+    --sheet: #1c2028;
+    --desk: #0f1217;
+    --graphite: #e4e6ea;
+    --pencil: #a2a8b3;
+    --rule: #2d333d;
+    --ink: #aab6ff;
+    --ink-strong: #c8cfff;
+    --on-ink: #10131a;
+    --marker: #5a5219;
+    --marker-text: #f6f1d6;
+    --sketch-line: #c9ced8;
+    --error: #ff8f84;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+}
+
+/* Controls */
+
+button,
+.button {
+  font: 700 0.95rem/1 var(--ui);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.6rem 1.05rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button:hover,
+.button:hover {
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.primary {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.primary:hover {
+  background: var(--ink-strong);
+  border-color: var(--ink-strong);
+}
+
+.quiet {
+  border-color: transparent;
+  color: var(--pencil);
+  font-weight: 400;
+}
+
+.quiet:hover {
+  color: var(--graphite);
+  background: color-mix(in srgb, var(--graphite) 7%, transparent);
+}
+
+button:disabled,
+.button.disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+select {
+  font: 400 0.95rem var(--ui);
+  min-height: 2.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  background: var(--sheet);
+  color: var(--graphite);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.button input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.button:focus-within {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The highlighter: one stroke style for every sentence being read. */
+
+.sentence.active,
+.demo-sentence {
+  background-image: linear-gradient(transparent 10%, var(--marker) 10%, var(--marker) 90%, transparent 90%);
+  background-repeat: no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  border-radius: 0.15em 0.4em 0.25em 0.45em;
+  color: var(--marker-text);
+}
+
+/* Landing page */
+
+.site,
+.site-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+}
+
+/* The header spans the window and stays at the top while the page scrolls. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.masthead-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo,
+.preview-pill {
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .masthead .logo {
+    font-size: 1.6rem;
+  }
+}
+
+/* A link to the project on GitHub, with its stars, like GitHub's own button. */
+.github-button {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1.5px solid var(--graphite);
+  border-radius: 8px;
+  color: var(--graphite);
+  font: 700 0.9rem/1 var(--ui);
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.github-label,
+.github-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.8rem;
+}
+
+.github-label {
+  background: var(--graphite);
+  color: var(--paper);
+}
+
+.github-stars {
+  gap: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.github-button:hover .github-label {
+  background: var(--ink);
+}
+
+.github-button:hover {
+  border-color: var(--ink);
+}
+
+/* The logo: a sketched, pencil-hatched face, like the pictures it introduces. */
+.logo {
+  font: 700 2.1rem/1 "Cabin Sketch", var(--reading);
+  letter-spacing: 0.01em;
+  color: var(--graphite);
+}
+
+.preview-pill {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--pencil);
+  font-size: 0.85rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+  padding: clamp(1.5rem, 5vw, 4rem) 0 clamp(2.5rem, 6vw, 5rem);
+}
+
+.hero h1 {
+  margin: 0 0 1.25rem;
+  font: 560 clamp(2.4rem, 5.4vw, 4rem) / 1.04 var(--reading);
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.hero h1 em {
+  font-weight: 480;
+  color: var(--ink);
+}
+
+.lede {
+  margin: 0 0 1.75rem;
+  max-width: 34rem;
+  font: 400 1.2rem/1.6 var(--reading);
+  color: var(--pencil);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.limits {
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
+  color: var(--pencil);
+}
+
+.preview-note {
+  margin: 1.75rem 0 0;
+  padding-left: 0.9rem;
+  border-left: 3px solid var(--marker);
+  max-width: 34rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--pencil);
+}
+
+.error-banner {
+  margin: 1rem 0 0;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid var(--error);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+  color: var(--error);
+}
+
+/* The hero miniature */
+
+.hero-demo {
+  position: relative;
+  margin: 0;
+}
+
+.demo-page {
+  position: relative;
+  width: 82%;
+  padding: 1.6rem 1.6rem 4.5rem;
+  background: var(--sheet);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  font: 400 0.98rem/1.7 var(--reading);
+}
+
+.demo-heading {
+  display: block;
+  margin-bottom: 0.6rem;
+  font: 600 1.05rem var(--reading);
+  font-variation-settings: "opsz" 36;
+}
+
+.demo-page p {
+  margin: 0;
+}
+
+.demo-sketch {
+  position: relative;
+  width: 52%;
+  margin: -3.6rem 0 0 auto;
+  padding: 0.5rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  transform: rotate(1.6deg);
+}
+
+.demo-sketch svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  stroke: var(--sketch-line);
+  stroke-width: 1.7;
+}
+
+.margin-note {
+  position: absolute;
+  font: 500 1.15rem/1 var(--pencil-hand);
+  color: var(--pencil);
+  white-space: nowrap;
+}
+
+.margin-note-text {
+  left: 1.6rem;
+  bottom: 0.8rem;
+}
+
+.margin-note-sketch {
+  right: 0.4rem;
+  bottom: -1.6rem;
+  transform: rotate(-1.5deg);
+}
+
+.demo-sentence {
+  background-size: 0% 100%;
+}
+
+.demo-sentence-1 {
+  animation: mark-1 12s linear infinite;
+}
+
+.demo-sentence-2 {
+  animation: mark-2 12s linear infinite;
+}
+
+.demo-sentence-3 {
+  animation: mark-3 12s linear infinite;
+}
+
+@keyframes mark-1 {
+  0% {
+    background-size: 0% 100%;
+  }
+  8%,
+  31% {
+    background-size: 100% 100%;
+  }
+  33%,
+  100% {
+    background-size: 0% 100%;
+  }
+}
+
+@keyframes mark-2 {
+  0%,
+  33% {
+    background-size: 0% 100%;
+  }
+  41%,
+  64% {
+    background-size: 100% 100%;
+  }
+  66%,
+  100% {
+    background-size: 0% 100%;
+  }
+}
+
+@keyframes mark-3 {
+  0%,
+  66% {
+    background-size: 0% 100%;
+  }
+  74%,
+  97% {
+    background-size: 100% 100%;
+  }
+  100% {
+    background-size: 0% 100%;
+  }
+}
+
+.sketch-part path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.sketch-part-1 path {
+  animation: draw-1 12s ease-in-out infinite;
+}
+
+.sketch-part-2 path {
+  animation: draw-2 12s ease-in-out infinite;
+}
+
+.sketch-part-3 path {
+  animation: draw-3 12s ease-in-out infinite;
+}
+
+@keyframes draw-1 {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  25%,
+  92% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes draw-2 {
+  0%,
+  33% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  58%,
+  92% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes draw-3 {
+  0%,
+  66% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  88%,
+  92% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* Shelf and privacy */
+
+.shelf,
+.privacy {
+  padding: 2.25rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.shelf h2,
+.privacy h2 {
+  margin: 0 0 1.25rem;
+  font: 600 1.45rem var(--reading);
+  font-variation-settings: "opsz" 48;
+}
+
+.books {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.books li {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.6rem;
+  background: var(--sheet);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(36, 38, 43, 0.06);
+}
+
+.book-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The book's first page, small, as its cover. */
+.book-cover {
+  flex: none;
+  width: 60px;
+  height: 84px;
+  border-radius: 3px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  object-fit: cover;
+  object-position: top;
+}
+
+.book-cover.blank {
+  background: var(--rule);
+  box-shadow: none;
+}
+
+.book-title {
+  font: 600 1.1rem var(--reading);
+}
+
+.status,
+.book-error {
+  font-size: 0.9rem;
+  color: var(--pencil);
+}
+
+.status.failed,
+.book-error {
+  color: var(--error);
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* What happens to your PDF: a route from the file, which stays, to each service that gets some of its text. */
+.route {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 2.75rem; /* the line from the file to the trunk spans it */
+  margin-bottom: 2.25rem;
+}
+
+.route-file {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.route-file::after {
+  content: "";
+  position: absolute;
+  top: 4.3rem; /* the middle of the sheet */
+  left: calc(100% + 0.6rem);
+  width: 2.15rem;
+  border-top: 1.5px solid var(--sketch-line);
+}
+
+/* The PDF: a page with its corner folded and a few lines of text. */
+.route-sheet {
+  position: relative;
+  width: 6.5rem;
+  height: 8.6rem;
+  border-radius: 3px;
+  background: var(--sheet);
+  clip-path: polygon(0 0, calc(100% - 1.2rem) 0, 100% 1.2rem, 100% 100%, 0 100%);
+}
+
+.route-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 1.7rem 0.85rem 2.1rem;
+  background: repeating-linear-gradient(to bottom, var(--rule) 0 2px, transparent 2px 0.62rem);
+}
+
+.route-sheet::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: linear-gradient(225deg, transparent 50%, var(--rule) 50%);
+}
+
+.route-sheet span {
+  position: absolute;
+  left: 0.85rem;
+  bottom: 0.7rem;
+  font: 700 0.72rem var(--ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pencil);
+}
+
+.route-file > .route-sheet {
+  filter: drop-shadow(0 1px 1px rgba(36, 38, 43, 0.14)) drop-shadow(0 6px 14px rgba(36, 38, 43, 0.1));
+}
+
+.route-file figcaption {
+  max-width: 8rem;
+  text-align: center;
+  font: 500 1.3rem/1.05 var(--pencil-hand);
+  color: var(--pencil);
+  rotate: -2deg;
+}
+
+.route-stops {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.route-stops li {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(6rem, 8.5rem) minmax(0, 1fr);
+  column-gap: 1.25rem;
+  padding: 0.75rem 0 0.75rem 2rem;
+}
+
+/* The trunk, from the first stop's branch to the last's, and a branch to each stop. */
+.route-stops li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-left: 1.5px solid var(--sketch-line);
+}
+
+.route-stops li:first-child::before {
+  top: 1.45rem;
+}
+
+.route-stops li:last-child::before {
+  bottom: auto;
+  height: 1.45rem;
+}
+
+.route-stops li:only-child::before {
+  display: none;
+}
+
+.route-stops li::after {
+  content: "";
+  position: absolute;
+  top: 1.45rem;
+  left: 0;
+  width: 1.4rem;
+  border-top: 1.5px solid var(--sketch-line);
+}
+
+.route-who {
+  grid-row: span 2;
+  align-self: start;
+  font: 700 1rem/1.45 var(--ui);
+}
+
+/* The reader's own key: another way, from their browser, not from this server. */
+.route-own {
+  display: flex;
+  gap: 0.6rem;
+  margin: 1rem 0 0 2rem;
+  padding: 0.85rem 1rem;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 55%, transparent);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--pencil);
+}
+
+.route-own svg {
+  flex: none;
+  margin-top: 0.15rem;
+  color: var(--ink);
+}
+
+.route-own strong {
+  color: var(--ink);
+}
+
+.route-gets {
+  font: 600 1rem/1.45 var(--reading);
+}
+
+.route-why {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--pencil);
+}
+
+.promises {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.25rem 2rem;
+  margin: 0;
+  padding-top: 1.75rem;
+  border-top: 1px dotted var(--rule);
+}
+
+.promises dt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+  font: 600 1.02rem var(--reading);
+}
+
+.promises dt svg {
+  flex: none;
+  margin-top: 0.2rem; /* on the title's first line */
+  color: var(--ink);
+}
+
+.promises dd {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--pencil);
+}
+
+@media (max-width: 44rem) {
+
+  /* The route turns down the page: the file above, the trunk below its middle. */
+  .route {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1rem;
+  }
+
+  .route-file {
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+    column-gap: 1rem;
+  }
+
+  .route-sheet {
+    width: 4.2rem;
+    height: 5.6rem;
+  }
+
+  .route-sheet::before {
+    inset: 1.2rem 0.6rem 1.6rem;
+  }
+
+  .route-sheet span {
+    left: 0.6rem;
+    bottom: 0.5rem;
+  }
+
+  .route-file figcaption {
+    max-width: none;
+    text-align: left;
+  }
+
+  .route-file::after {
+    top: 100%;
+    left: 2.1rem;
+    width: 0;
+    height: 1rem;
+    border-top: 0;
+    border-left: 1.5px solid var(--sketch-line);
+  }
+
+  .route-stops {
+    margin-left: 2.1rem;
+  }
+
+  .route-stops li:first-child::before {
+    top: 0;
+  }
+
+  .route-stops li {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: 1.75rem;
+  }
+
+  .route-who {
+    grid-row: auto;
+  }
+
+  .route-own {
+    margin-left: 0;
+  }
+}
+
+.site-footer {
+  margin-top: 1rem;
+  border-top: 1px solid var(--rule);
+  background: var(--sheet);
+  font-size: 0.9rem;
+  color: var(--pencil);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 2rem clamp(1.5rem, 5vw, 4rem);
+  padding-top: 2.5rem;
+  padding-bottom: 2rem;
+}
+
+.footer-brand p {
+  max-width: 22rem;
+  margin: 0.6rem 0 0;
+  line-height: 1.55;
+}
+
+.site-footer h2 {
+  margin: 0 0 0.75rem;
+  font: 700 0.78rem var(--ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pencil);
+}
+
+.footer-links ul {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--graphite);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.footer-star p {
+  margin: 0 0 0.9rem;
+  line-height: 1.55;
+}
+
+.footer-legal {
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 760px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Preparing a book: a pencil line that fills with ink. */
+.preparation {
+  display: grid;
+  gap: 0.35rem;
+  width: min(100%, 30rem);
+}
+
+.progress {
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ink);
+  transition: width 600ms ease;
+}
+
+.progress-label {
+  font-size: 0.85rem;
+  color: var(--pencil);
+}
+
+.progress-percent {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--graphite);
+}
+
+.message .preparation {
+  margin: 0 0 1.5rem;
+}
+
+.shared-tag {
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font: 400 0.75rem/1.4 var(--ui);
+  color: var(--pencil);
+  vertical-align: 0.15em;
+}
+
+/* A book just added: in view below the sticky header, and marked for a moment. */
+.shelf {
+  scroll-margin-top: 5rem;
+}
+
+.books li {
+  scroll-margin-top: 6rem;
+  transition: box-shadow 400ms ease;
+}
+
+.books li.just-added {
+  box-shadow: 0 0 0 2px var(--ink), var(--shadow);
+}
+
+.drop-overlay {
+  position: fixed;
+  inset: 0.75rem;
+  display: grid;
+  place-items: center;
+  border: 3px dashed var(--ink);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  font: italic 500 clamp(1.6rem, 4vw, 2.4rem) var(--reading);
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.message {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+  font: 400 1.1rem/1.6 var(--reading);
+}
+
+/* Reader */
+
+.reader {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.reader-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  padding: 0.55rem clamp(0.75rem, 2vw, 1.25rem);
+  background: var(--sheet);
+  border-bottom: 1px solid var(--rule);
+}
+
+.bar-book {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.brand {
+  flex: none;
+  padding-right: 0.75rem;
+  border-right: 1px solid var(--rule);
+  text-decoration: none;
+}
+
+.brand:hover .logo {
+  color: var(--ink);
+}
+
+.bar-book h1 {
+  margin: 0;
+  font: 600 1.1rem var(--reading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playback,
+.bar-view,
+.sentence-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sentence-nav span {
+  min-width: 6.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--pencil);
+}
+
+.sentence-nav button {
+  min-width: 2.5rem;
+  padding: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.play {
+  min-width: 6.5rem;
+}
+
+.narration-status,
+.warnings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 1rem;
+  padding: 0.4rem clamp(0.75rem, 2vw, 1.25rem);
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.88rem;
+  color: var(--pencil);
+}
+
+.warnings {
+  display: block;
+}
+
+.disclosure {
+  font-style: italic;
+}
+
+button.link {
+  min-height: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.reader-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.reader-grid.sized {
+  grid-template-columns: minmax(0, 1fr) auto var(--side-width);
+}
+
+/* Handles for resizing the picture and text column, and the picture itself. */
+.splitter {
+  position: relative;
+  display: grid;
+  place-items: center;
+  touch-action: none;
+}
+
+.splitter-columns {
+  width: 0.65rem;
+  border-left: 1px solid var(--rule);
+  background: var(--paper);
+  cursor: col-resize;
+}
+
+.splitter-rows {
+  width: min(100%, calc(var(--sketch-height, 38vh) * 3 / 2));
+  height: 0.95rem;
+  margin: 0.15rem auto 0;
+  cursor: row-resize;
+}
+
+.splitter-grip {
+  border-radius: 999px;
+  background: var(--rule);
+  transition: background 150ms ease;
+}
+
+.splitter-columns .splitter-grip {
+  width: 4px;
+  height: 2.75rem;
+}
+
+.splitter-rows .splitter-grip {
+  width: 2.75rem;
+  height: 4px;
+}
+
+.splitter:hover .splitter-grip,
+.splitter:focus-visible .splitter-grip {
+  background: var(--ink);
+}
+
+.splitter:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
+button.icon {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.35rem;
+}
+
+/* The book's chapters and pages, beside the page. */
+.book-column {
+  display: grid;
+  grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+  min-height: 0;
+  background: var(--desk);
+}
+
+.book-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+  padding: 1rem 0.7rem;
+  border-right: 1px solid var(--rule);
+  background: var(--sheet);
+}
+
+.book-identity {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.45rem 0.85rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.cover {
+  display: block;
+  width: 56px;
+  height: auto;
+  border-radius: 3px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.book-name {
+  margin: 0;
+  font: 600 0.98rem/1.25 var(--reading);
+  overflow-wrap: anywhere;
+}
+
+.book-author {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: var(--pencil);
+}
+
+.nav-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: -0.35rem;
+}
+
+/* Folded: a slim strip of buttons, so pages and chapters can still be turned. */
+.book-column.nav-closed {
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+}
+
+.nav-strip {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.book-nav.closed {
+  padding: 0.75rem 0.4rem;
+}
+
+.book-nav.closed .nav-strip {
+  display: flex;
+}
+
+.book-nav.closed .book-identity,
+.book-nav.closed .nav-heading-row,
+.book-nav.closed .contents,
+.book-nav.closed .nav-steps {
+  display: none;
+}
+
+.strip-rule {
+  width: 1.5rem;
+  margin: 0.2rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.strip-page {
+  font: 700 0.85rem var(--ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite);
+}
+
+button.icon.quiet {
+  border-color: transparent;
+  color: var(--ink); /* working buttons in ink; disabled ones fade */
+}
+
+button.icon.quiet:hover:not(:disabled) {
+  border-color: var(--rule);
+}
+
+.nav-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0.45rem;
+  font: 700 0.78rem var(--ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pencil);
+}
+
+.contents {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.contents button {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 0;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--graphite);
+  font: 400 0.9rem/1.3 var(--reading);
+  text-align: left;
+}
+
+.contents button:hover {
+  background: var(--paper);
+}
+
+.contents button[aria-current="true"] {
+  background: color-mix(in srgb, var(--ink) 10%, var(--sheet));
+  color: var(--ink-strong);
+  font-weight: 600;
+}
+
+.contents-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.contents-page {
+  flex: none;
+  font: 400 0.78rem var(--ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--pencil);
+}
+
+.front-matter button {
+  font-style: italic;
+  color: var(--pencil);
+}
+
+.contents-progress {
+  display: block;
+  height: 2px;
+  margin: 0.1rem 0.5rem 0.35rem;
+  border-radius: 1px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.contents-progress span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+
+.contents-select {
+  display: none;
+}
+
+.nav-steps {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rule);
+}
+
+.step-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.step-label {
+  font-size: 0.85rem;
+  color: var(--pencil);
+}
+
+.page-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.page-field input {
+  width: 3.4rem;
+  min-height: 2.1rem;
+  padding: 0.2rem 0.35rem;
+  border: 1.5px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--graphite);
+  font: 400 0.9rem var(--ui);
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.page-field input::-webkit-inner-spin-button,
+.page-field input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+/* Narrower screens: the chapters become a menu, in one row above the page. */
+@media (max-width: 1280px) {
+  .book-column {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .book-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .book-column.nav-closed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .book-nav.closed {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .book-identity,
+  .nav-heading-row,
+  .contents,
+  .book-nav.closed .nav-strip {
+    display: none;
+  }
+
+  .book-nav.closed .nav-steps {
+    display: flex;
+  }
+
+  .contents-select {
+    display: block;
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
+  .contents-select select {
+    width: 100%;
+  }
+
+  .nav-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+/* The whole page is drawn inside this frame, so the highlighted sentence is always in view. */
+.page-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(0.5rem, 1.5vw, 1rem);
+  background: var(--desk);
+}
+
+.page {
+  position: relative;
+  flex: none;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.page canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.highlight {
+  position: absolute;
+  background: var(--marker-page);
+  mix-blend-mode: multiply;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--paper);
+}
+
+.sketch-panel {
+  padding: 1rem clamp(1rem, 3vw, 2.25rem) 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sketch-frame {
+  position: relative;
+  container-type: inline-size; /* the corner logo scales with the picture */
+  width: min(100%, calc(var(--sketch-height, 38vh) * 3 / 2));
+  aspect-ratio: 3 / 2; /* the pictures are drawn 1536 x 1024 */
+  margin: 0 auto;
+  background: #f5f3ec;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.sketch {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Each picture fades in over the last, then drifts: a slow zoom and pan, like a camera over an illustration. */
+.sketch-layer {
+  position: absolute;
+  inset: 0;
+  animation: sketch-fade 700ms ease;
+}
+
+.sketch-layer .sketch {
+  transform-origin: center;
+  /* Written out: the minifier reads a shorthand without a name as "none". */
+  animation-duration: 28s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.sketch-layer[data-drift="0"] .sketch {
+  animation-name: drift-0;
+}
+
+.sketch-layer[data-drift="1"] .sketch {
+  animation-name: drift-1;
+}
+
+.sketch-layer[data-drift="2"] .sketch {
+  animation-name: drift-2;
+}
+
+.sketch-layer[data-drift="3"] .sketch {
+  animation-name: drift-3;
+}
+
+@keyframes drift-0 {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08) translate(-1.5%, -1%);
+  }
+}
+
+@keyframes drift-1 {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08) translate(1.5%, -1%);
+  }
+}
+
+@keyframes drift-2 {
+  from {
+    transform: scale(1.08) translate(1.5%, 1%);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes drift-3 {
+  from {
+    transform: scale(1.06) translate(-1%, 0);
+  }
+  to {
+    transform: scale(1.06) translate(1%, 0);
+  }
+}
+
+@keyframes sketch-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sketch-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 1.5rem;
+  text-align: center;
+  font: 500 1.3rem/1.3 var(--pencil-hand);
+  color: #5f636c;
+}
+
+/* The channel's mark, like a television logo: top left, over every picture, on a small
+   smoked tag so it reads on light pencil paper and dark scenes alike. */
+.sketch-bug {
+  position: absolute;
+  top: 2.6cqw;
+  left: 2.6cqw;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
+  max-width: 70%;
+  padding: 0.35em 0.65em 0.4em;
+  border-radius: 0.45em;
+  background: rgba(18, 20, 24, 0.42);
+  backdrop-filter: blur(3px);
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.bug-logo {
+  flex: none;
+  font: 700 max(0.85rem, 3.4cqw) / 1 "Cabin Sketch", var(--reading);
+  letter-spacing: 0.01em;
+}
+
+.bug-title {
+  overflow: hidden;
+  font: 600 max(0.62rem, 1.8cqw) / 1.2 var(--ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sketch-label {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(251, 251, 248, 0.9);
+  color: #3b3f48;
+  font-size: 0.78rem;
+}
+
+.sketch-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding-top: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--pencil);
+}
+
+.sketch-meta label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* The reader's own OpenAI key: asked for when the site's limit is reached, managed from the settings button. */
+.key-dialog {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: var(--sheet);
+  color: var(--graphite);
+  box-shadow: var(--shadow);
+}
+
+.key-dialog::backdrop {
+  background: rgba(15, 18, 23, 0.55);
+}
+
+.key-dialog form {
+  display: grid;
+  gap: 0.85rem;
+  padding: clamp(1.1rem, 4vw, 1.6rem);
+}
+
+.key-dialog h2 {
+  margin: 0;
+  font: 600 1.4rem/1.25 var(--reading);
+}
+
+.key-dialog p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.key-dialog .dialog-actions {
+  flex-wrap: wrap;
+}
+
+.key-dialog .dialog-actions button {
+  white-space: nowrap;
+}
+
+/* A book that could not be read: the samples to read instead, and the ways to help. */
+.refusal-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.refusal-links {
+  align-items: center;
+}
+
+/* While reading: the picture choice in one line, with a way to change it. */
+.picture-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.75rem;
+  padding-top: 0.45rem;
+  font-size: 0.88rem;
+  color: var(--pencil);
+}
+
+.summary-label {
+  font-weight: 700;
+  color: var(--graphite);
+}
+
+/* Picture choices: example pictures for the style, a timeline for how often they change. */
+.picture-dialog {
+  width: min(50rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: var(--sheet);
+  color: var(--graphite);
+  box-shadow: var(--shadow);
+}
+
+.picture-dialog::backdrop {
+  background: rgba(15, 18, 23, 0.55);
+}
+
+.picture-dialog form {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.1rem, 4vw, 1.75rem);
+}
+
+.picture-dialog h2 {
+  margin: 0;
+  font: 600 1.5rem/1.25 var(--reading);
+}
+
+.dialog-book {
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+  color: var(--pencil);
+  overflow-wrap: anywhere;
+}
+
+.choice-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice-group legend {
+  margin-bottom: 0.55rem;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pencil);
+}
+
+.style-cards,
+.interval-options {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.style-cards {
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+}
+
+.interval-options {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.style-card,
+.interval-option {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper);
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.style-card {
+  overflow: hidden;
+}
+
+.interval-option {
+  align-content: start;
+  padding: 0.7rem 0.75rem 0.65rem;
+}
+
+/* The radio itself is hidden; the whole card is the control, and shows focus and the choice. */
+.style-card input,
+.interval-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.style-card:hover,
+.interval-option:hover {
+  border-color: var(--pencil);
+}
+
+.style-card:has(input:checked),
+.interval-option:has(input:checked) {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.style-card:has(input:focus-visible),
+.interval-option:has(input:focus-visible) {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.style-card:has(input:checked)::after,
+.interval-option:has(input:checked)::after {
+  content: "✓";
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--on-ink);
+  font: 700 0.85rem/1 var(--ui);
+}
+
+.interval-option .card-name {
+  padding-right: 1.3rem; /* room for the check mark */
+}
+
+/* A pace kept for readers with their own key: shown, but not chosen without one. */
+.interval-option.locked {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.interval-option.locked:hover {
+  border-color: var(--rule);
+}
+
+/* Auto takes the whole first row: the choice most readers want. */
+.interval-option.auto {
+  grid-column: 1 / -1;
+}
+
+.interval-option .badge {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--marker);
+  color: var(--marker-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: 0.1em;
+}
+
+.interval-option:has(input:checked)::after {
+  top: 0.55rem;
+  right: 0.5rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  font-size: 0.7rem;
+}
+
+.style-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.card-text {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.15rem 0.75rem 0.7rem;
+}
+
+.card-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.card-note,
+.example-caption {
+  font-size: 0.82rem;
+  color: var(--pencil);
+}
+
+.example-caption {
+  margin: 0.5rem 0 0;
+}
+
+/* A minute of reading, with one tick per picture. */
+.ticks {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 0.9rem;
+  margin: 0.15rem 0;
+  padding: 0 0.1rem;
+  border-bottom: 1.5px solid var(--rule);
+}
+
+.ticks span {
+  width: 2px;
+  height: 0.7rem;
+  border-radius: 1px;
+  background: var(--ink);
+}
+
+.ticks span:only-child {
+  margin-right: auto;
+}
+
+.ticks.story {
+  position: relative;
+  display: block;
+}
+
+.ticks.story span {
+  position: absolute;
+  bottom: 0.1rem;
+  transform: translateX(-50%);
+}
+
+.dialog-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--pencil);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+@media (max-width: 620px) {
+  .style-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .style-card {
+    grid-template-columns: 7.5rem 1fr;
+    align-items: center;
+  }
+
+  .card-text {
+    padding: 0.5rem 2.2rem 0.5rem 0;
+  }
+
+  .interval-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.text-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 1.5rem clamp(1rem, 3vw, 2.25rem) 3rem;
+  font: 400 1.14rem/1.78 var(--reading);
+}
+
+.text-panel > * {
+  max-width: 38rem;
+}
+
+.text-panel h2 {
+  font: 600 1.45rem/1.3 var(--reading);
+  font-variation-settings: "opsz" 48;
+}
+
+.sentence {
+  cursor: pointer;
+}
+
+.sentence:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 0.2em;
+}
+
+.notice {
+  padding: 1.5rem;
+  color: var(--pencil);
+}
+
+.reader-footer {
+  display: flex;
+  justify-content: center;
+  padding: 0.35rem clamp(0.75rem, 2vw, 1.25rem);
+  border-top: 1px solid var(--rule);
+  background: var(--sheet);
+  font-size: 0.8rem;
+}
+
+.reader-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--pencil);
+  text-decoration: none;
+}
+
+.reader-footer a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* After the last sentence of a book. */
+.end-of-book {
+  position: fixed;
+  right: 1rem;
+  bottom: 2.75rem;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+  width: min(24rem, calc(100vw - 2rem));
+  padding: 1rem 1rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--sheet);
+  box-shadow: var(--shadow);
+}
+
+.end-of-book p {
+  grid-column: 1;
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.end-of-book .github-button {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.end-of-book > button {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Small screens */
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-demo {
+    padding-bottom: 1.5rem;
+  }
+
+  .demo-page {
+    width: 100%;
+  }
+
+  .demo-sketch {
+    width: 54%; /* clear of the page's margin note */
+  }
+
+  .reader {
+    height: auto;
+  }
+
+  .reader-grid,
+  .reader-grid.sized {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .splitter {
+    display: none;
+  }
+
+  .page-frame {
+    height: min(72vh, 140vw); /* about a page's shape, so little space is left around it */
+    height: min(72dvh, 140vw);
+  }
+
+  .text-panel {
+    max-height: 60vh;
+  }
+}
+
+@media (max-width: 560px) {
+  .books li {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .books li .actions {
+    grid-column: 1 / -1;
+  }
+
+  .playback {
+    flex-wrap: wrap;
+  }
+}
+
+/* Accounts: the header's sign-in corner, the reader's menu, and the dialogs to add and share books. */
+.masthead-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logo-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes account-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.shelf-note,
+.quiet-note {
+  color: var(--pencil);
+  font-size: 0.86rem;
+}
+
+.shelf-note {
+  margin: -0.4rem 0 0.8rem;
+}
+
+.modal-body {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1.4rem 1.5rem 1.2rem;
+}
+
+.key-dialog .modal-body form {
+  padding: 0; /* already inside the dialog's padding */
+}
+
+.modal-body h2 {
+  margin: 0;
+}
+
+.modal-body p {
+  margin: 0;
+}
+
+.reports {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.reports li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: start;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--sheet);
+}
+
+.reports p {
+  margin: 0.2rem 0;
+}
+
+/* Motion is optional: show the finished sketch and the first highlight instead. */
+
+@media (prefers-reduced-motion: reduce) {
+  .splitter-grip,
+  .books li,
+  .cover-button,
+  .cover-open,
+  .progress-fill,
+  .style-card,
+  .interval-option {
+    transition: none;
+  }
+
+  .demo-sentence-1,
+  .demo-sentence-2,
+  .demo-sentence-3,
+  .sketch-part-1 path,
+  .sketch-part-2 path,
+  .sketch-part-3 path,
+  .sketch-layer,
+  .sketch-layer .sketch {
+    animation: none;
+  }
+
+  .sketch-part path {
+    stroke-dashoffset: 0;
+  }
+
+  .demo-sentence-1 {
+    background-size: 100% 100%;
+  }
+
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The study build's console (#/study, docs/study.md) */
+
+.study-console {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.study-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.study-header h1 {
+  margin: 0;
+  font: 700 1.4rem/1.2 var(--ui);
+}
+
+.study-build,
+.study-note {
+  color: var(--pencil);
+  font-size: 0.9rem;
+}
+
+.study-console section {
+  margin-top: 2rem;
+}
+
+.study-console h2 {
+  margin: 0 0 0.75rem;
+  font: 700 1.1rem/1.3 var(--ui);
+}
+
+.study-field {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--pencil);
+}
+
+.study-field input {
+  min-width: 8rem;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  background: var(--sheet);
+  color: var(--graphite);
+  font: 400 0.95rem var(--ui);
+}
+
+.study-sessions {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.study-sessions li {
+  display: grid;
+  grid-template-columns: 9rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--sheet);
+}
+
+.study-ready {
+  font-size: 0.85rem;
+  color: var(--pencil);
+}
+
+.study-ready.not {
+  color: var(--error);
+}
+
+.study-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.study-table th,
+.study-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+
+.study-table thead th {
+  color: var(--pencil);
+  font-weight: 400;
+}
+
+.study-run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .study-sessions li {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .study-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* A library's heading, with its tools in the top-right corner: add a book, and show covers or a list. */
+.shelf-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.shelf-head h1,
+.shelf-head h2 {
+  margin: 0 0 0.5rem;
+  font: 600 1.45rem var(--reading);
+  font-variation-settings: "opsz" 48;
+}
+
+.shelf-head h1 {
+  font-size: 1.9rem;
+}
+
+.shelf-head .shelf-note {
+  margin: 0;
+}
+
+.shelf-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
+.view-toggle {
+  display: inline-flex;
+  border: 1.5px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.view-toggle button {
+  min-height: 2.4rem;
+  padding: 0 0.65rem;
+  border: none;
+  border-radius: 0;
+  color: var(--pencil);
+}
+
+.view-toggle button + button {
+  border-left: 1.5px solid var(--rule);
+}
+
+.view-toggle button[aria-pressed="true"] {
+  background: var(--graphite);
+  color: var(--paper);
+}
+
+.empty-shelf {
+  padding: 1.5rem 1.2rem;
+  border: 1px dashed var(--rule);
+  border-radius: 10px;
+  background: var(--sheet);
+}
+
+.empty-shelf p {
+  margin: 0 0 0.3rem;
+}
+
+/* Books as covers in a grid. */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 1.75rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.book-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+  scroll-margin-top: 6rem;
+}
+
+.cover-button {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 7;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: transform 160ms ease, box-shadow 400ms ease;
+}
+
+.cover-button:hover:not(:disabled) {
+  background: #ffffff;
+  transform: translateY(-3px);
+}
+
+.cover-button:disabled {
+  opacity: 1;
+}
+
+.cover-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.cover-blank {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 1rem;
+  background: var(--rule);
+  color: var(--pencil);
+  font: italic 500 1rem/1.3 var(--reading);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.cover-open {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.6rem;
+  background: color-mix(in srgb, var(--ink) 92%, transparent);
+  color: var(--on-ink);
+  font: 700 0.9rem/1 var(--ui);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.cover-button:hover .cover-open,
+.cover-button:focus-visible .cover-open {
+  opacity: 1;
+}
+
+.cover-button .shared-tag {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  margin: 0;
+  background: var(--sheet);
+}
+
+.book-card.just-added .cover-button {
+  box-shadow: 0 0 0 3px var(--ink), var(--shadow);
+}
+
+.card-info {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.card-info .book-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.card-info .status,
+.card-info .progress-label,
+.card-info .book-error {
+  font-size: 0.8rem;
+}
+
+.status.readers {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.book-card .actions {
+  flex-wrap: wrap;
+  gap: 0 0.3rem;
+  margin: -0.2rem 0 0 -0.5rem;
+}
+
+.book-card .actions:empty {
+  display: none;
+}
+
+.book-card .actions button {
+  min-height: 0;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 560px) {
+  .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 1rem;
+  }
+
+  .masthead .preview-pill {
+    display: none;
+  }
+}
+
+.strip {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) 4.5rem;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+@media (max-width: 760px) {
+
+  .strip {
+    grid-template-columns: 6.25rem minmax(0, 1fr) 3.9rem;
+    gap: 0.6rem;
+  }
+}
+
+/* The home page's note that your own books need a key: the key icon sits on the line. */
+.key-note svg {
+  vertical-align: -0.2em;
+}
+
+.way {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.way h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0.75rem;
+  font: 600 1.45rem var(--reading);
+}
+
+.way p {
+  max-width: 46rem;
+}
+
+@media (max-width: 640px) {
+  .way {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+}
+
