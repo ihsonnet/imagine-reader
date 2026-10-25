@@ -1,0 +1,21 @@
+name: Idea or improvement
+description: A new picture style, a language, a better way to read
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe it from a reader's side. An example passage or picture helps.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it would help
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Helping
+      options:
+        - label: I would like to work on this

@@ -1,0 +1,37 @@
+name: A book reads badly
+description: Wrong reading order, a header read aloud, a sentence cut in half, a highlight in the wrong place
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Please do not attach books you are not allowed to share. Public-domain books are easiest to look into.
+  - type: input
+    id: book
+    attributes:
+      label: Book
+      description: Title, author, and where the PDF comes from (a link if it is public)
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Page or sentence
+      description: The page number and a few words of the sentence
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected
+      description: What you heard or saw. A screenshot helps.
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language of the book
+      options:
+        - English
+        - Bangla
+        - Another language
