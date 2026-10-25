@@ -18,7 +18,7 @@ export function useBookAdder({ info, onAdded }: { info: ServiceInfo | null; onAd
   const [adding, setAdding] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const allowed = info?.uploads ?? false;
+  const allowed = info !== null; // once the picture choices are known
 
   function choose() {
     input.current?.click();

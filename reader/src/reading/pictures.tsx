@@ -15,12 +15,9 @@ const STYLES: Record<string, { name: string; note: string; example: string }> = 
   animated: { name: "Hand-painted animation", note: "Hand-painted, like an animated film", example: ghibliExample },
 };
 
-// The study build names the colour styles by what tells them apart (docs/study.md).
-const STUDY_NAMES: Record<string, string> = { color: "Watercolour", "color-hd": "Detailed colour" };
-
-/** A picture style's name as this site shows it. */
-export function styleName(style: string, study = false): string {
-  return (study && STUDY_NAMES[style]) || STYLES[style]?.name || style;
+/** A picture style's name, as the reader shows it. */
+export function styleName(style: string): string {
+  return STYLES[style]?.name || style;
 }
 
 // How often a new picture appears, with how many pictures that makes in a minute of a story told slowly.
@@ -83,7 +80,7 @@ export function usePictureChoice(info: ServiceInfo | null) {
     store(STYLE_KEY, next.style);
     store(WORDS_KEY, String(next.words));
   };
-  return { choice, styles, intervals, save, study: !!info?.study };
+  return { choice, styles, intervals, save };
 }
 
 export type Pictures = ReturnType<typeof usePictureChoice>;
@@ -93,8 +90,8 @@ export function frequencyName(words: number): string {
   return INTERVALS[words]?.short ?? `every ${words} words`;
 }
 
-function describe({ style, words }: PictureChoice, study: boolean): string {
-  return `${styleName(style, study)}, ${frequencyName(words)}`;
+function describe({ style, words }: PictureChoice): string {
+  return `${styleName(style)}, ${frequencyName(words)}`;
 }
 
 /** A dense or sparse row of ticks: how often pictures change in a minute of reading. */
@@ -182,7 +179,7 @@ export function PictureDialog(props: {
                   />
                   {known && <img src={known.example} alt="" width={480} height={320} />}
                   <span className="card-text">
-                    <span className="card-name">{styleName(style, pictures.study)}</span>
+                    <span className="card-name">{styleName(style)}</span>
                     {known && <span className="card-note">{known.note}</span>}
                   </span>
                 </label>
@@ -238,19 +235,17 @@ export function PictureDialog(props: {
   );
 }
 
-/** While reading: the current choice in one line, and a button that opens the choices unless they are locked. */
-export function PictureSummary({ pictures, locked = false }: { pictures: Pictures; locked?: boolean }) {
+/** While reading: the current choice in one line, and a button that opens the choices. */
+export function PictureSummary({ pictures }: { pictures: Pictures }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="picture-summary">
       <span>
-        <span className="summary-label">Pictures:</span> {describe(pictures.choice, pictures.study)}
+        <span className="summary-label">Pictures:</span> {describe(pictures.choice)}
       </span>
-      {!locked && (
-        <button type="button" className="link" onClick={() => setOpen(true)}>
-          <SlidersHorizontal size={15} aria-hidden="true" /> Change
-        </button>
-      )}
+      <button type="button" className="link" onClick={() => setOpen(true)}>
+        <SlidersHorizontal size={15} aria-hidden="true" /> Change
+      </button>
       {open && (
         <PictureDialog
           title="Change the pictures"

@@ -11,11 +11,10 @@ import { PdfPage } from "./PdfPage";
 import { PreparationProgress, readyToOpen } from "../library/Progress";
 import { SketchPanel } from "./SketchPanel";
 import { TextPanel } from "./TextPanel";
-import type { Book, NarrationManifest, Reading, Sentence, ServiceInfo, StudySession } from "../lib/types";
+import type { Book, NarrationManifest, Reading, Sentence, ServiceInfo } from "../lib/types";
 import { useNarration } from "./useNarration";
 import { pictureOutstanding, useSketches } from "./useSketches";
-import { type PictureChoice, type Pictures, PictureSummary, usePictureChoice } from "./pictures";
-import { useStudyLog } from "../study/study";
+import { PictureSummary, usePictureChoice } from "./pictures";
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
 const positionKey = (bookId: string) => `imagine-reader:position:${bookId}`;
@@ -73,36 +72,24 @@ function storyStart(reading: Reading): number {
   return reading.sentences.find((sentence) => sentence.paragraph_id === paragraph)?.order ?? 0;
 }
 
-/**
- * The reader. In a study session (``study``) every participant starts alike: at
- * the story, with pictures shown, nothing remembered from earlier readers, and,
- * when the session is locked, no way to change the pictures or the speed.
- */
-export function Reader({ bookId, onClose, study }: { bookId: string; onClose: () => void; study?: StudySession }) {
-  const inStudy = !!study;
-  const locked = !!study?.locked;
+/** The reader: the book's own page with the sentence highlighted, its voice, and the pictures beside it. */
+export function Reader({ bookId, onClose }: { bookId: string; onClose: () => void }) {
   const [book, setBook] = useState<Book | null>(null);
   const [reading, setReading] = useState<Reading | null>(null);
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [active, setActive] = useState(() => (inStudy ? null : savedPosition(bookId)) ?? 0);
-  const [showPictures, setShowPictures] = useState(() => inStudy || loadFlag("imagine-reader:pictures", true));
-  const [waitForPictures, setWaitForPictures] = useState(
-    () => locked || loadFlag("imagine-reader:wait-for-pictures", true),
-  );
+  const [active, setActive] = useState(() => savedPosition(bookId) ?? 0);
+  const [showPictures, setShowPictures] = useState(() => loadFlag("imagine-reader:pictures", true));
+  const [waitForPictures, setWaitForPictures] = useState(() => loadFlag("imagine-reader:wait-for-pictures", true));
   const [finished, setFinished] = useState(false); // the last sentence of the book was read aloud
-  const [sideWidth, setSideWidth] = useState(() => (inStudy ? null : loadSize("imagine-reader:side-width"))); // pixels
-  const [pictureHeight, setPictureHeight] = useState(() => (inStudy ? null : loadSize("imagine-reader:picture-height")));
-  const remember = !inStudy; // a study session leaves the next participant's reader as it found it
+  const [sideWidth, setSideWidth] = useState(() => loadSize("imagine-reader:side-width")); // pixels
+  const [pictureHeight, setPictureHeight] = useState(() => loadSize("imagine-reader:picture-height"));
   const grid = useRef<HTMLDivElement>(null);
   const sideColumn = useRef<HTMLDivElement>(null);
-  const [navOpen, setNavOpen] = useState(() => !inStudy && loadFlag("imagine-reader:book-nav-open", false)); // folded
+  const [navOpen, setNavOpen] = useState(() => loadFlag("imagine-reader:book-nav-open", false)); // folded
   const [narrationStopped, setNarrationStopped] = useState(false); // the reader pressed "Stop preparing"
   const [info, setInfo] = useState<ServiceInfo | null>(null);
-  const pictureChoice = usePictureChoice(info);
-  const [sessionChoice, setSessionChoice] = useState<PictureChoice | null>(() =>
-    study ? { style: study.style, words: study.words } : null,
-  );
+  const pictures = usePictureChoice(info);
 
   useEffect(() => {
     api.info().then(setInfo, () => {}); // the picture choices this site offers
@@ -128,7 +115,7 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
         task = pdfjs.openPdf(api.sourceUrl(bookId));
         const [text, document] = await Promise.all([api.reading(bookId), task.promise]);
         if (stopped) return;
-        if (inStudy || savedPosition(bookId) === null) setActive(storyStart(text)); // a first visit opens at the story
+        if (savedPosition(bookId) === null) setActive(storyStart(text)); // a first visit opens at the story
         setReading(text);
         setPdf(document);
       } catch (e) {
@@ -179,7 +166,7 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
     sectionId: reading ? section?.id : undefined,
     nextSectionId: nextSection?.id,
     activeOrder: current?.order ?? 0,
-    choice: sessionChoice ?? pictureChoice.choice,
+    choice: pictures.choice,
     enabled: showPictures && !narrationStopped,
   });
   const holdForPictures = showPictures && waitForPictures;
@@ -204,44 +191,10 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
       : "off",
   });
 
-  const studyLog = useStudyLog({
-    session: study,
-    open: !!(book && reading && pdf),
-    total,
-    order: current?.order,
-    status: narration.status,
-    pictures: showPictures ? shownPictures : null,
-    holdForPictures,
-  });
-  // In a session, the pictures are the session's: fixed when locked, and logged when a benchmark changes them.
-  const pictures: Pictures = sessionChoice
-    ? {
-        ...pictureChoice,
-        choice: sessionChoice,
-        save: (next: PictureChoice) => {
-          studyLog.note("setting_change", { from: sessionChoice, to: next });
-          setSessionChoice(next);
-        },
-      }
-    : pictureChoice;
-
   const togglePlay = useCallback(() => {
     if (!narration.playing) setNarrationStopped(false);
-    studyLog.note(narration.playing ? "pause" : "resume");
     narration.toggle();
-  }, [narration.playing, narration.toggle, studyLog.note]);
-
-  const endSession = useCallback(
-    async (reason: "finished" | "ended") => {
-      await studyLog.end(reason);
-      if (reason === "ended") onClose();
-    },
-    [studyLog.end, onClose],
-  );
-
-  useEffect(() => {
-    if (finished && inStudy) void endSession("finished");
-  }, [finished, inStudy, endSession]);
+  }, [narration.playing, narration.toggle]);
 
   const cancelPreparation = useCallback(() => {
     setNarrationStopped(true);
@@ -252,11 +205,10 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
   const go = useCallback(
     (order: number) => {
       const target = Math.max(0, Math.min(order, total - 1));
-      if (target !== active) studyLog.note(target < active ? "replay" : "skip", { from: active, to: target });
       setActive(target);
       narration.seekTo(target);
     },
-    [total, narration.seekTo, active, studyLog.note],
+    [total, narration.seekTo],
   );
 
   /** Turn to a page: reading moves to the first sentence that starts on it, or on the next page with text. */
@@ -272,13 +224,13 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
   const shownPage = current?.boxes[0]?.[0] ?? section?.page ?? 1;
 
   useEffect(() => {
-    if (!reading || !remember) return; // until the book is loaded, the position is not the reader's yet
+    if (!reading) return; // until the book is loaded, the position is not the reader's yet
     try {
       window.localStorage.setItem(positionKey(bookId), String(active));
     } catch {
       // position memory is a convenience only
     }
-  }, [bookId, active, reading, remember]);
+  }, [bookId, active, reading]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -314,27 +266,12 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
     <div className="reader">
       <header className="reader-bar">
         <div className="bar-book">
-          {inStudy ? (
-            <span className="brand">
-              <Logo size="small" />
-            </span>
-          ) : (
-            <a className="brand" href="#" onClick={(event) => (event.preventDefault(), onClose())}>
-              <Logo size="small" />
-            </a>
-          )}
-          {inStudy ? (
-            <button
-              className="quiet"
-              onClick={() => window.confirm("End this session and return to the study console?") && endSession("ended")}
-            >
-              End session
-            </button>
-          ) : (
-            <button className="quiet" onClick={onClose}>
-              <ArrowLeft size={17} aria-hidden="true" /> Library
-            </button>
-          )}
+          <a className="brand" href="#" onClick={(event) => (event.preventDefault(), onClose())}>
+            <Logo size="small" />
+          </a>
+          <button className="quiet" onClick={onClose}>
+            <ArrowLeft size={17} aria-hidden="true" /> Library
+          </button>
           <h1 title={book.filename}>{identity.title}</h1>
         </div>
         {total > 0 && (
@@ -354,18 +291,16 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
                 </>
               )}
             </button>
-            {!locked && (
-              <label>
-                <span className="visually-hidden">Speed</span>
-                <select value={narration.rate} onChange={(event) => narration.setRate(Number(event.target.value))}>
-                  {SPEEDS.map((speed) => (
-                    <option key={speed} value={speed}>
-                      {speed}×
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+            <label>
+              <span className="visually-hidden">Speed</span>
+              <select value={narration.rate} onChange={(event) => narration.setRate(Number(event.target.value))}>
+                {SPEEDS.map((speed) => (
+                  <option key={speed} value={speed}>
+                    {speed}×
+                  </option>
+                ))}
+              </select>
+            </label>
             <div className="sentence-nav">
               <button className="icon" aria-label="Previous sentence" onClick={() => go(active - 1)} disabled={active === 0}>
                 <ChevronLeft size={18} />
@@ -389,9 +324,8 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
             className="quiet"
             aria-pressed={showPictures}
             onClick={() => {
-              studyLog.note(showPictures ? "pictures_hidden" : "pictures_shown");
               setShowPictures(!showPictures);
-              if (remember) saveFlag("imagine-reader:pictures", !showPictures);
+              saveFlag("imagine-reader:pictures", !showPictures);
             }}
           >
             {showPictures ? <ImageOff size={17} aria-hidden="true" /> : <Image size={17} aria-hidden="true" />}
@@ -449,7 +383,7 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
               open={navOpen}
               onToggle={() => {
                 setNavOpen(!navOpen);
-                if (remember) saveFlag("imagine-reader:book-nav-open", !navOpen);
+                saveFlag("imagine-reader:book-nav-open", !navOpen);
               }}
               onGo={go}
               onPage={goToPage}
@@ -475,11 +409,11 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
           direction={-1}
           onChange={(width) => {
             setSideWidth(width);
-            if (remember) saveSize("imagine-reader:side-width", width);
+            saveSize("imagine-reader:side-width", width);
           }}
           onReset={() => {
             setSideWidth(null);
-            if (remember) saveSize("imagine-reader:side-width", null);
+            saveSize("imagine-reader:side-width", null);
           }}
         />
         <div className="side" ref={sideColumn}>
@@ -490,16 +424,11 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
               activeOrder={current.order}
               error={sketches.error}
               waitForPictures={waitForPictures}
-              onWaitChange={
-                locked
-                  ? undefined
-                  : (wait) => {
-                      setWaitForPictures(wait);
-                      if (remember) saveFlag("imagine-reader:wait-for-pictures", wait);
-                    }
-              }
-              onShown={studyLog.pictureShown}
-              options={<PictureSummary pictures={pictures} locked={locked} />}
+              onWaitChange={(wait) => {
+                setWaitForPictures(wait);
+                saveFlag("imagine-reader:wait-for-pictures", wait);
+              }}
+              options={<PictureSummary pictures={pictures} />}
               bookTitle={identity.title}
               resizer={
                 <Splitter
@@ -511,11 +440,11 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
                   max={Math.round(window.innerHeight * 0.8)}
                   onChange={(height) => {
                     setPictureHeight(height);
-                    if (remember) saveSize("imagine-reader:picture-height", height);
+                    saveSize("imagine-reader:picture-height", height);
                   }}
                   onReset={() => {
                     setPictureHeight(null);
-                    if (remember) saveSize("imagine-reader:picture-height", null);
+                    saveSize("imagine-reader:picture-height", null);
                   }}
                 />
               }
@@ -533,18 +462,8 @@ export function Reader({ bookId, onClose, study }: { bookId: string; onClose: ()
           )}
         </div>
       </div>
-      {finished &&
-        (inStudy ? (
-          <div className="end-of-book" role="status">
-            <p>
-              <strong>This story is finished.</strong> Please tell the researcher.
-            </p>
-            <button onClick={onClose}>Back to the study console</button>
-          </div>
-        ) : (
-          <EndOfBook onClose={() => setFinished(false)} />
-        ))}
-      {!inStudy && <ReaderFooter />}
+      {finished && <EndOfBook onClose={() => setFinished(false)} />}
+      <ReaderFooter />
     </div>
   );
 }
@@ -569,8 +488,6 @@ function NarrationStatus(props: {
     message = "Today's spending limit is reached. The voice carries on after midnight UTC, or raise IR_DAILY_SPEND_LIMIT_USD.";
   else if (stopped === "provider_account")
     message = "Your AI key was refused: check it, and its credit, in your settings (.env).";
-  else if (stopped === "voice_quota")
-    message = `The rest of this chapter's voice is recorded tomorrow, when the narrator's daily allowance resets. ${ready} of ${segments.length} sentences are ready to play.`;
   else if (overBudget)
     message = `This book's narration budget is used up (${manifest!.characters_used.toLocaleString()} of ${manifest!.character_budget.toLocaleString()} characters).`;
   else if (cancelled) message = "Narration preparation stopped. Press Play to resume it.";

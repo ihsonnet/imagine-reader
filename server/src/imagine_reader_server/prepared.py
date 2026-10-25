@@ -44,7 +44,7 @@ def prepare_next(engine: Engine, settings: Settings, book_id: str, plans: list[t
             return
         # The voice waits on a day its narrator's (Gemini's) requests are used up, rather than being made in
         # another voice.
-        for section in [] if narration.voice_waits_today(settings, book) else sections:
+        for section in sections:
             voice = narration.section_voice(settings, book, section)
             clips = narration.manifest(db, settings, book, section, voice)
             if not clips.preparing and (not clips.segments or any(c.status in UNFINISHED for c in clips.segments)):

@@ -88,7 +88,6 @@ docker compose up -d --build
   | `site/` | Header, logo, footer, and the dialog frame, on every page |
   | `library/` | The home page: your books, the samples, adding a book, and where a PDF's text goes |
   | `reading/` | The reader: the PDF page, narration, pictures, and their choices |
-  | `study/` | The research study's console and its logging |
 
   Tests sit next to the files they test, as `name.test.ts`.
 

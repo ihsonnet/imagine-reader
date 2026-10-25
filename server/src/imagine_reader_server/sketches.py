@@ -37,8 +37,6 @@ from imagine_reader.providers import (
     CloudflareImageProvider,
     ImageProvider,
     MockImageProvider,
-    OpenAIImageProvider,
-    OpenAITextModel,
     OpenRouterImageProvider,
     OpenRouterTextModel,
     Picture,
@@ -76,8 +74,8 @@ log = logging.getLogger(__name__)
 ACTIVE = ("queued", "running")
 _UNFINISHED = ("pending", "failed")
 
-# Picture styles readers can choose: (drawing style, image quality). Low quality is $0.006 and about
-# 8 seconds a picture on gpt-image-1-mini; medium is $0.015 and about 15 seconds.
+# Picture styles readers can choose: (drawing style, image quality). Cloudflare draws medium quality larger;
+# OpenRouter draws every picture at about a megapixel.
 STYLES = {
     "pencil": ("pencil", "low"),
     "color": ("color", "low"),
@@ -102,39 +100,26 @@ class UnknownPictureOption(ValueError):
     pass
 
 
-# The study build's styles (study.py): the hand-painted look is offered without a studio's name.
-STUDY_STYLES = ("pencil", "color", "color-hd", "animated")
-
-
 def offered_styles(settings: Settings) -> list[str]:
-    """The picture styles readers may choose on this site, in the order they are shown."""
-    if settings.study_dir is not None:
-        return list(STUDY_STYLES)
+    """The picture styles readers may choose, in the order they are shown."""
     return [style.strip() for style in settings.picture_styles.split(",") if style.strip() in STYLES]
 
 
 def offered_words(settings: Settings) -> list[int]:
-    """How often pictures may change on this site, Auto (0) first."""
-    if settings.study_dir is not None:
-        from .study import FREQUENCIES  # the study's own levels
-
-        return list(FREQUENCIES)
+    """How often pictures may change, Auto (0) first."""
     return sorted({*WORD_CHOICES, *([settings.sketch_words] if settings.sketch_words is not None else [])})
 
 
 def default_words(settings: Settings) -> int:
     """The pace a reader starts with: the setting, else Auto (4 or 5 pictures a minute), or a picture about every 25
     seconds when OpenRouter draws them, where they cost about ten times Cloudflare's price."""
-    offered = offered_words(settings)
     if settings.sketch_words is not None:
         return settings.sketch_words
-    if settings.study_dir is not None:
-        return 25 if 25 in offered else offered[0]
-    return 60 if _image_choice(settings) == "openrouter" else AUTO
+    return 60 if settings.ai and not settings.cloudflare else AUTO
 
 
 def check_offered(settings: Settings, style: str | None) -> None:
-    """Refuse a style this site does not offer; books keep any style they were prepared with."""
+    """Refuse a style that is not offered; books keep any style they were prepared with."""
     if style is not None and style not in offered_styles(settings):
         raise UnknownPictureOption(f"picture style {style!r} is not offered")
 
@@ -176,15 +161,12 @@ def plan_for(settings: Settings, style: str | None = None, words: int | None = N
 
 
 def story_brain(settings: Settings, words: int | None = None, sample: bool = False) -> StoryBrain:
-    """auto: with a key for the language model (OpenRouter's or OpenAI's), storyboards (the study build keeps the
-    cast-only brain its paper describes); without one, the text rules, except for the samples, whose storyboards
-    come in the sample pack (anything new for them waits for a key)."""
+    """auto: with the key, storyboards; without it, the text rules, except for the samples, whose storyboards come in
+    the sample pack (anything new for them waits for a key)."""
     words = default_words(settings) if words is None else words
     choice = settings.story_brain
-    if choice == "auto" and settings.study_dir is not None:
-        choice = "cast" if settings.text_key else "heuristic"  # the study's passages are shared, not the samples
-    elif choice == "auto":
-        choice = "board" if settings.text_key or sample else "heuristic"
+    if choice == "auto":
+        choice = "board" if settings.ai or sample else "heuristic"
     if choice == "heuristic":
         return HeuristicStoryBrain(words)
     if choice in ("cast", "board"):
@@ -193,54 +175,24 @@ def story_brain(settings: Settings, words: int | None = None, sample: bool = Fal
     raise ValueError(f"unknown story brain {settings.story_brain!r}")
 
 
-def _text_model(settings: Settings) -> OpenRouterTextModel | OpenAITextModel:
-    """The language model, through OpenRouter or with OpenAI's own key (the same model, the same id); without
-    either, one that cannot be asked, for the samples' plans that come ready-made."""
-    if settings.openrouter_api_key:
-        return OpenRouterTextModel(settings.openrouter_api_key.get_secret_value(), settings.story_model)
-    key = settings.openai_api_key.get_secret_value() if settings.openai_api_key else ""
-    return OpenAITextModel(key, settings.story_model)
-
-
-def _image_choice(settings: Settings) -> str:
-    choice = settings.image_provider
-    if choice == "auto":
-        if settings.study_dir is not None:
-            return "openai" if settings.openai_api_key else "mock"  # as the study's paper describes
-        if settings.cloudflare:
-            return "cloudflare"
-        return "openrouter" if settings.openrouter_api_key else "openai" if settings.openai_api_key else "mock"
-    return choice
+def _text_model(settings: Settings) -> OpenRouterTextModel:
+    """The language model, through OpenRouter; without the key, one that cannot be asked, for the samples' plans that
+    come ready-made."""
+    key = settings.openrouter_api_key.get_secret_value() if settings.openrouter_api_key else ""
+    return OpenRouterTextModel(key, settings.story_model)
 
 
 def image_provider(settings: Settings, quality: str | None = None) -> ImageProvider:
-    """Cloudflare's FLUX.2 [klein] 4B with its account, else the same model through OpenRouter, else OpenAI's."""
-    choice = _image_choice(settings)
-    if choice == "mock":
-        return MockImageProvider()
-    if choice == "cloudflare":
-        if not (settings.cloudflare_account_id and settings.cloudflare_api_token):
-            raise ValueError("IR_IMAGE_PROVIDER=cloudflare needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN")
+    """FLUX.2 [klein] 4B: on Cloudflare with its account, else through OpenRouter; placeholders without either."""
+    if settings.cloudflare:
         return CloudflareImageProvider(
             settings.cloudflare_account_id,
             settings.cloudflare_api_token.get_secret_value(),
             quality=quality or STYLES[settings.sketch_style][1],
         )
-    if choice == "openrouter":
-        if not settings.openrouter_api_key:
-            raise ValueError("IR_IMAGE_PROVIDER=openrouter needs OPENROUTER_API_KEY")
+    if settings.openrouter_api_key:
         return OpenRouterImageProvider(settings.openrouter_api_key.get_secret_value())
-    if choice == "openai":
-        if not settings.openai_api_key:
-            raise ValueError("IR_IMAGE_PROVIDER=openai needs OPENAI_API_KEY")
-        return OpenAIImageProvider(
-            settings.openai_api_key.get_secret_value(),
-            model=settings.image_model,
-            quality=quality or STYLES[settings.sketch_style][1],
-            size=settings.image_size,
-            usd_per_image=settings.image_usd_each,
-        )
-    raise ValueError(f"unknown image provider {choice!r}")
+    return MockImageProvider()
 
 
 def sections_from_reading(view: dict) -> list[SectionText]:

@@ -10,9 +10,6 @@ x-app: &app
   env_file:
     - path: .env
       required: false
-  environment:
-    IR_UPLOADS: ${IR_UPLOADS:-true} # false for a public demo of the samples only
-    IR_CLIENT_IP_HEADER: ${IR_CLIENT_IP_HEADER:-}
   volumes:
     - data:/data
   restart: unless-stopped

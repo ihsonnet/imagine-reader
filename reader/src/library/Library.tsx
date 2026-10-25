@@ -235,22 +235,12 @@ export function Library({ onOpen }: { onOpen: (id: string) => void }) {
   );
 }
 
-/**
- * What your own books need, when something is missing: a key (OpenRouter's is all it takes), or credit, or a new
- * day. A public demo, which offers only its samples, says where to run your own.
- */
+/** What your own books need, when something is missing: the OpenRouter key, or credit, or a new day. */
 function KeyNotice({ info }: { info: ServiceInfo | null }) {
   const { repository } = useProject();
   if (!info) return null;
   const guide = page(repository, "#run-it-on-your-computer");
-  if (!info.uploads)
-    return (
-      <p className="preview-note">
-        <strong>A demo of the samples.</strong> To read your own books, run Imagine-Reader on your computer with your
-        own OpenRouter key: <a href={guide}>it takes one command</a>.
-      </p>
-    );
-  if (info.services.voice === "placeholders" || info.services.voice === "none")
+  if (info.services.voice === "placeholders")
     return (
       <p className="preview-note key-note">
         <KeyRound size={16} aria-hidden="true" /> <strong>Add your OpenRouter key</strong> to give your own books a
@@ -273,20 +263,9 @@ function KeyNotice({ info }: { info: ServiceInfo | null }) {
     );
   return (
     <p className="preview-note">
-      <strong>Early preview.</strong> The voice and the sketches are made by AI (
-      {describe(info)}). Scanned pages cannot be read yet.
+      <strong>Early preview.</strong> The voice and the sketches are made by AI (Google's Gemini storyteller, and
+      FLUX.2 pictures {info.services.pictures === "cloudflare" ? "on Cloudflare" : "through OpenRouter"}). Scanned
+      pages cannot be read yet.
     </p>
   );
-}
-
-function describe(info: ServiceInfo): string {
-  const via = (route: string) => (route === "openrouter" ? " through OpenRouter" : "");
-  const voice = `Google's Gemini storyteller${via(info.services.voice)}`;
-  const pictures =
-    info.services.pictures === "cloudflare"
-      ? "FLUX.2 pictures on Cloudflare"
-      : info.services.pictures === "openrouter"
-        ? "FLUX.2 pictures through OpenRouter"
-        : "OpenAI's pictures";
-  return info.services.voice === "openai" ? `OpenAI's voice, ${pictures}` : `${voice}, ${pictures}`;
 }

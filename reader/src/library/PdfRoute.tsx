@@ -8,12 +8,12 @@ interface Stop {
   why: string;
 }
 
-/** Who gets what from a book, with the keys set: the planning, the voice and its check, and the pictures. */
+/** Who gets what from a book with the keys set: OpenRouter, for the planning, the voice and its check, and the
+ * pictures, unless a Cloudflare account draws them. */
 function stopsFor(info: ServiceInfo): Stop[] {
-  const { planning, voice, pictures } = info.services;
+  const { voice, pictures } = info.services;
   const stops: Stop[] = [];
-  const openrouter = [planning, voice, pictures].includes("openrouter");
-  if (openrouter)
+  if (voice === "openrouter")
     stops.push({
       who: "OpenRouter",
       gets: "The text once, then each chapter as you reach it",
@@ -23,14 +23,8 @@ function stopsFor(info: ServiceInfo): Stop[] {
         (pictures === "openrouter" ? ", and FLUX.2 to draw the pictures." : ".") +
         " Each recording is heard by OpenAI's recogniser, to check it was cut between the right sentences.",
     });
-  if (planning === "openai")
-    stops.push({ who: "OpenAI", gets: "The text once, then each chapter", why: "To plan each chapter's pictures." });
-  if (voice === "gemini") stops.push({ who: "Google", gets: "The sentences", why: "To read them aloud (Gemini)." });
-  if (voice === "openai") stops.push({ who: "OpenAI", gets: "The sentences", why: "To read them aloud." });
   if (pictures === "cloudflare")
     stops.push({ who: "Cloudflare", gets: "A written description of each picture", why: "Drawn with FLUX.2 [klein]." });
-  if (pictures === "openai")
-    stops.push({ who: "OpenAI", gets: "A written description of each picture", why: "To draw it." });
   return stops;
 }
 
@@ -44,7 +38,6 @@ export function PdfRoute({ info }: { info: ServiceInfo | null }) {
   const shown: Stop[] = stops.length
     ? stops
     : [{ who: "Nothing", gets: "Until you add a key", why: "Nothing from your books leaves your computer." }];
-  const here = info.uploads ? "your computer" : "this server";
   return (
     <section className="privacy" aria-labelledby="privacy-title">
       <h2 id="privacy-title">What happens to your PDF</h2>
@@ -53,7 +46,7 @@ export function PdfRoute({ info }: { info: ServiceInfo | null }) {
           <div className="route-sheet" aria-hidden="true">
             <span>.pdf</span>
           </div>
-          <figcaption>The file stays on {here}</figcaption>
+          <figcaption>The file stays on your computer</figcaption>
         </figure>
         <div>
           <ul className="route-stops">

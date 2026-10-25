@@ -1,8 +1,7 @@
 """HTTP API for the reader.
 
 It runs on your own computer: every book on it is yours, kept until you delete it, and its voice and pictures are
-made with your own keys (``.env``). A public demo turns uploads off (``IR_UPLOADS=false``) and offers only the
-samples. Book routes answer 404 for a book that does not exist.
+made with your own OpenRouter key (``.env``). Book routes answer 404 for a book that does not exist.
 """
 
 import hashlib
@@ -23,11 +22,10 @@ from sqlalchemy.orm import Session
 from imagine_reader.narration import NarrationManifest
 from imagine_reader.story import SketchManifest
 
-from . import narration, project, reading, sketches, spending, storage, study
+from . import narration, project, reading, sketches, spending, storage
 from .config import Settings
 from .db import Book, Job, NarrationClip, SceneRecord, make_engine, utcnow
 from .jobs import PREPARATION, TRIMMABLE, cancel_preparation, enqueue_ingest
-from .limits import RateLimiter, StorageMeter, client_address
 from .prepared import RESUME_MARGIN_USD
 from .sample import SAMPLE_BOOK_ID, SAMPLES, cover_version, ensure_samples, own_cover
 
@@ -173,21 +171,13 @@ def _save_upload(upload: UploadFile, path: Path, maximum: int) -> tuple[int, str
 
 
 def _services(settings: Settings) -> dict:
-    """Who makes what with the keys set, for the reader to show (and to say when a key is missing)."""
-    voice = narration.speech_provider(settings)
-    pictures = sketches.image_provider(settings)
-
-    def route(provider_id: str) -> str:
-        if provider_id.startswith("mock"):
-            return "placeholders"
-        if provider_id.startswith("gemini"):
-            return "openrouter" if settings.openrouter_api_key else "gemini" if settings.gemini_api_key else "none"
-        return provider_id.split("-", 1)[0]  # openai | cloudflare | openrouter
-
+    """Who makes what, for the reader to show (and to say when the key is missing): OpenRouter with the key, and
+    Cloudflare for the pictures with its account; without them, the text rules and placeholders."""
+    with_key = "openrouter" if settings.ai else None
     return {
-        "planning": "openrouter" if settings.openrouter_api_key else "openai" if settings.openai_api_key else "rules",
-        "voice": route(voice.id),
-        "pictures": route(pictures.id),
+        "planning": with_key or "rules",
+        "voice": with_key or "placeholders",
+        "pictures": "cloudflare" if settings.cloudflare else with_key or "placeholders",
     }
 
 
@@ -199,10 +189,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.engine = engine
     if settings.samples:
         ensure_samples(engine, settings)
-    if settings.study_dir is not None:
-        study.install(engine, settings)
-    limiter = RateLimiter()
-    storage_meter = StorageMeter(settings.data_dir / "books")
 
     @app.middleware("http")
     async def guard(request: Request, call_next):
@@ -213,13 +199,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             and int(length) > settings.max_upload_bytes + _MULTIPART_OVERHEAD
         ):
             return JSONResponse({"detail": "The file is larger than the upload limit."}, status_code=413)
-        visitor = client_address(request, settings)
-        if request.url.path.startswith("/api/") and not limiter.allow(
-            f"requests:{visitor}", settings.requests_per_minute, 60
-        ):
-            return JSONResponse(
-                {"detail": "Too many requests. Please slow down."}, status_code=429, headers={"Retry-After": "60"}
-            )
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
@@ -227,20 +206,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
         return response
-
-    def check_new_book(request: Request, db: Session) -> None:
-        """Limits on adding a book: uploads on, per visitor, and for the whole reader."""
-        if not settings.uploads:
-            raise HTTPException(403, "This reader offers its samples only. Run your own to read your books.")
-        if not limiter.allow(f"uploads:{client_address(request, settings)}", settings.uploads_per_hour, 3600):
-            raise HTTPException(429, "You have added many books recently. Please try again in an hour.")
-        waiting = db.scalar(select(func.count()).where(Job.kind == "ingest", Job.state == "queued"))
-        if waiting >= settings.max_queued_ingests or storage_meter.megabytes() >= settings.max_storage_mb:
-            raise HTTPException(503, "The reader is busy, or its storage is full. Please try again later.")
-
-    def check_preparation(request: Request) -> None:
-        if not limiter.allow(f"preparations:{client_address(request, settings)}", settings.preparations_per_hour, 3600):
-            raise HTTPException(429, "Too many narration or picture requests. Please try again later.")
 
     def database() -> Iterator[Session]:
         with Session(engine) as db:
@@ -274,8 +239,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         """What the reader should know: who makes the voice and pictures, the choices, and the limits."""
         return {
             "ai_status": ai_status(db),  # ok, daily_limit, or unavailable: whether voice and pictures can be made now
-            "services": _services(settings),  # planning, voice, pictures: openrouter | gemini | openai | cloudflare
-            "uploads": settings.uploads,
+            "services": _services(settings),  # planning, voice, pictures: openrouter (pictures: or cloudflare)
             "max_upload_mb": settings.max_upload_bytes // (1024 * 1024),
             "max_pages": settings.max_pages,
             "daily_limit_usd": settings.daily_spend_limit_usd,
@@ -287,7 +251,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "picture_words": sketches.offered_words(settings),
             "default_style": settings.sketch_style,
             "default_words": sketches.default_words(settings),
-            "study": settings.study_dir is not None,  # the study build: its console is at /#/study
         }
 
     @router.get("/project")
@@ -300,14 +263,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @router.post("/books", status_code=201)
     def upload_book(
-        request: Request,
         file: UploadFile,
         db: Database,
         style: Annotated[str | None, Form()] = None,
         words: Annotated[int | None, Form()] = None,
     ) -> BookOut:
         """Add a PDF. ``style`` and ``words`` choose the pictures its opening chapter is prepared with."""
-        check_new_book(request, db)
         plan = picture_plan(style, words)
         book_id = secrets.token_hex(16)
         directory = storage.book_dir(settings, book_id)
@@ -341,9 +302,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         """Your books, newest first, then the samples."""
         order = (Book.shared, case((Book.shared, Book.id), else_=""), Book.created_at.desc())  # samples in order
         books = db.scalars(select(Book).order_by(*order)).all()
-        if settings.study_dir is None:  # the study's passages are shared too, but not for this list
-            samples = {sample.id for sample in SAMPLES}
-            books = [book for book in books if not book.shared or book.id in samples]
         return [_out(book, db, settings) for book in books]
 
     @router.get("/books/{book_id}")
@@ -355,9 +313,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         """Read a book that was too long again, up to the page and word limits."""
         if book.status != "failed" or book.error_code not in TRIMMABLE:
             raise HTTPException(409, "Only a book that was too long can be trimmed.")
-        waiting = db.scalar(select(func.count()).where(Job.kind == "ingest", Job.state == "queued"))
-        if waiting >= settings.max_queued_ingests:
-            raise HTTPException(503, "The reader is busy right now. Please try again in a little while.")
         book.status, book.error_code, book.error_message = "queued", None, None
         enqueue_ingest(db, book.id, trim=True)
         db.commit()
@@ -394,9 +349,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     @router.post("/books/{book_id}/narration", status_code=202)
-    def request_narration(body: NarrationRequest, request: Request, book: OwnedBook, db: Database) -> NarrationManifest:
+    def request_narration(body: NarrationRequest, book: OwnedBook, db: Database) -> NarrationManifest:
         """Prepare narration for one section (recorded clips are reused) and return its manifest."""
-        check_preparation(request)
         if book.status != "ready":
             raise HTTPException(409, "The book is not ready yet.")
         voice = _voice(body.voice, book.id) if body.voice else narration.section_voice(settings, book, body.section_id)
@@ -413,9 +367,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return narration.manifest(db, settings, book, section_id, voice)
 
     @router.post("/books/{book_id}/sketches", status_code=202)
-    def request_sketches(body: SketchRequest, request: Request, book: OwnedBook, db: Database) -> SketchManifest:
+    def request_sketches(body: SketchRequest, book: OwnedBook, db: Database) -> SketchManifest:
         """Plan and draw one section's pictures (drawn pictures are reused) and return its manifest."""
-        check_preparation(request)
         if book.status != "ready":
             raise HTTPException(409, "The book is not ready yet.")
         picture_plan(body.style, body.words)
@@ -511,58 +464,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         db.commit()
         return Response(status_code=204)
 
-    if settings.study_dir is not None:
-        add_study_routes(router, settings, Database, readable_book)
     app.include_router(router)
 
     if settings.reader_dist.is_dir():  # serve the built reader from the same origin
         app.mount("/", StaticFiles(directory=settings.reader_dist, html=True), name="reader")
     return app
-
-
-def add_study_routes(router: APIRouter, settings: Settings, Database, readable_book) -> None:
-    """The study build's console, sessions, and interaction log (study.py, docs/study.md)."""
-
-    @router.get("/study")
-    def study_overview(db: Database) -> dict:
-        """The build, the models, and how far each passage's voice and pictures are prepared."""
-        return study.overview(db, settings)
-
-    @router.get("/study/schedule")
-    def study_schedule(participant: int) -> list[dict]:
-        """The passage and pictures of each of a participant's four sessions."""
-        try:
-            return study.schedule_for(participant)
-        except ValueError as error:
-            raise HTTPException(422, str(error)) from None
-
-    @router.post("/study/sessions", status_code=201)
-    def start_study_session(body: study.SessionIn, request: Request, db: Database) -> study.StudySession:
-        """Start a session; a study or practice session only once its pictures and voice are all prepared."""
-        if body.kind == "benchmark":
-            readable_book(body.book_id or "", db)  # a book on this reader
-        try:
-            return study.start_session(db, settings, body)
-        except study.NotPrepared as error:
-            raise HTTPException(409, str(error)) from None
-        except (ValueError, sketches.UnknownPictureOption) as error:
-            raise HTTPException(422, str(error)) from None
-
-    @router.get("/study/sessions/{session_id}")
-    def get_study_session(session_id: str) -> study.StudySession:
-        session = study.load_session(settings, session_id)
-        if session is None:
-            raise HTTPException(404, "Session not found.")
-        return session
-
-    @router.post("/study/sessions/{session_id}/events", status_code=204)
-    def log_study_events(session_id: str, body: study.EventBatch) -> Response:
-        """Append the reader's events to the participant's log."""
-        session = study.load_session(settings, session_id)
-        if session is None:
-            raise HTTPException(404, "Session not found.")
-        try:
-            study.log_events(settings, session, body.events)
-        except ValueError as error:
-            raise HTTPException(422, str(error)) from None
-        return Response(status_code=204)

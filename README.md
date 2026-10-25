@@ -11,10 +11,10 @@ It reads English and Bangla.
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Live demo](https://img.shields.io/badge/try%20it-imagine--reader.ihsonnet.com-2b3a8c.svg)](https://imagine-reader.ihsonnet.com)
 
-**See it at [imagine-reader.ihsonnet.com](https://imagine-reader.ihsonnet.com)**: three sample books, one
-in English and two in Bangla, with their voice and pictures ready. To read
-your own books, [run it on your computer](#run-it-on-your-computer) with one
-OpenRouter key.
+**Try the samples at [imagine-reader.ihsonnet.com](https://imagine-reader.ihsonnet.com)**: three
+books, one in English and two in Bangla, with their voice and pictures ready.
+To read your own books, [run it on your computer](#run-it-on-your-computer)
+with one OpenRouter key.
 
 ![The reader with A Room with a View: the book's chapters on the left, the PDF page with the current sentence highlighted, and a pencil sketch of the scene above the text](docs/images/reader.webp)
 
@@ -67,8 +67,9 @@ should look, and the book opens once its first chapter is ready.
 
 One OpenRouter key does everything: it reaches OpenAI's model to plan the
 pictures, Google's Gemini storyteller to read aloud, OpenAI's recogniser to
-check each recording, and FLUX.2 to draw. If you already have OpenAI, Gemini
-or Cloudflare accounts, you can use them instead (see [Settings](#settings)).
+check each recording, and FLUX.2 to draw. No other account is needed, but a
+Cloudflare account can draw the pictures for much less (see
+[What it costs](#what-it-costs)).
 
 ### If something goes wrong
 
@@ -81,18 +82,18 @@ or Cloudflare accounts, you can use them instead (see [Settings](#settings)).
   `docker compose up -d` again.
 - **"Your AI key was refused."** The key is wrong, or its account has no
   credit left. Check both on [openrouter.ai](https://openrouter.ai/settings/credits).
-- **Anything else.** The worker's log says what it is doing and what went
-  wrong: `docker compose logs -f worker`.
 - **The pictures or voice stopped for the day.** The daily spending limit was
   reached (see [What it costs](#what-it-costs)). They carry on after midnight
   UTC, or straight away if you raise `IR_DAILY_SPEND_LIMIT_USD`.
+- **Anything else.** The worker's log says what it is doing and what went
+  wrong: `docker compose logs -f worker`.
 - **Still stuck?** [Open an issue](https://github.com/ihsonnet/imagine-reader/issues/new/choose)
   with what you did and what you saw. Leave your key out of anything you paste.
 
 ### What it costs
 
-You pay the AI providers for what your books use, at their list prices. An
-hour of narrated reading costs about:
+You pay for what your books use, at the models' list prices. An hour of
+narrated reading costs about:
 
 | | OpenRouter only | OpenRouter + Cloudflare for pictures |
 | --- | --- | --- |
@@ -104,9 +105,11 @@ hour of narrated reading costs about:
 
 Pictures cost about ten times as much through OpenRouter as on Cloudflare,
 so with OpenRouter alone a new picture appears about every 25 seconds by
-default; you can choose more in the reader. A free Cloudflare account draws
-about 60 pictures a day at no cost. Bangla is read by a cheaper voice model
-than English, so Bangla books cost a little less.
+default; you can choose more in the reader. For cheaper pictures, add a
+Cloudflare account to `.env` (`CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN`, a token with the Workers AI permission): it draws the
+same pictures, and its first 60 or so a day are free. Bangla is read by a
+cheaper voice model than English, so Bangla books cost a little less.
 
 Everything made is kept, so reading a book again costs nothing.
 `IR_DAILY_SPEND_LIMIT_USD` in `.env` (default $5) caps what your keys may
@@ -164,8 +167,10 @@ server: FastAPI + a background worker; jobs, cache, the daily limit and the spen
 reader: React + PDF.js; the page, the highlight, the voice and the pictures, kept in step
 ```
 
-The voice and pictures are prepared ahead of the reader, a chapter at a
-time, so they are ready when the reader gets there.
+Every model is reached through OpenRouter, with your one key, except the
+pictures when a Cloudflare account draws them. The voice and pictures are
+prepared ahead of the reader, a chapter at a time, so they are ready when the
+reader gets there.
 
 ### Reading the PDF
 
@@ -224,7 +229,7 @@ time, so they are ready when the reader gets there.
 - **Framing and portraits.** Each picture is framed as a wide, medium or close
   shot. The main characters' reference portraits go only with close shots, so
   wider pictures are composed freely instead of copying the portrait's pose.
-- **Drawn by FLUX.2 [klein] 4B**, on Cloudflare or through OpenRouter, in the
+- **Drawn by FLUX.2 [klein] 4B**, through OpenRouter or on Cloudflare, in the
   chosen style: 3:2 for scenes, square for portraits.
 
 ### Never worse, only later
@@ -237,8 +242,7 @@ models. Each request's estimated cost is recorded in a spending ledger, which
 the daily limit is checked against.
 
 Recordings and pictures are cached under the model, voice and plan that made
-them. The same models have the same ids whether they are reached through
-OpenRouter or directly, so switching between them keeps what was made.
+them, so nothing is paid for twice.
 
 ## Settings
 
@@ -250,35 +254,18 @@ likely to change:
 
 | Variable | Default | What it does |
 | --- | --- | --- |
-| `OPENROUTER_API_KEY` | (none) | The one key that does everything: planning, voice, its checks, and the pictures unless Cloudflare is set. |
-| `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | (none) | Draws the pictures on Cloudflare Workers AI, for about a tenth of OpenRouter's price. The token needs the Workers AI permission. |
-| `OPENAI_API_KEY`, `GEMINI_API_KEY` | (none) | Instead of OpenRouter: OpenAI's key plans the pictures and checks the voice, and Gemini's reads aloud. |
+| `OPENROUTER_API_KEY` | (none) | The one key that does everything: planning, the voice and its checks, and the pictures unless Cloudflare is set. |
+| `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | (none) | Optional: draws the pictures on Cloudflare Workers AI, for about a tenth of OpenRouter's price. The token needs the Workers AI permission. |
 | `IR_DAILY_SPEND_LIMIT_USD` | `5` | What your keys may spend per UTC day. |
 | `IR_SKETCH_STYLE` | `pencil` | The default picture style: `pencil`, `color`, `color-hd` or `ghibli`. |
-| `IR_SKETCH_WORDS` | Auto, or `60` when OpenRouter draws | The default pace: `0` is Auto; or a new picture after `1`, `25`, `60` or `120` words. |
+| `IR_SKETCH_WORDS` | `60`, or Auto with Cloudflare | The default pace: `0` is Auto; or a new picture after `1`, `25`, `60` or `120` words. |
 | `IR_SPEECH_VOICE` | `Charon` | The Gemini voice. |
-| `IR_SPEECH_PROVIDER` | `auto` | `openai` reads with OpenAI's `gpt-4o-mini-tts` (voice `IR_OPENAI_SPEECH_VOICE`, default `marin`) instead of Gemini. |
 | `IR_MAX_PAGES` / `IR_MAX_WORDS` | `1000` / `400000` | Upload limits. Longer books can be read up to the limit. |
 | `IR_PORT` | `8000` | The port on your computer. |
 
-### Running a public demo
-
-To put Imagine-Reader on a server for other people, turn uploads off so it
-offers only the samples. Add this line to `.env`:
-
-```bash
-IR_UPLOADS=false
-```
-
-With uploads off, nobody can add a book or spend your key, and the samples
-play from the sample pack. Put an HTTPS proxy (Caddy, nginx) in front of
-port 8000, and set `IR_CLIENT_IP_HEADER` to the header that carries the
-visitor's address (for example `x-real-ip`), so the per-visitor limits work.
-Set `IR_PREPARE_SAMPLES=true`, with keys, to prepare the samples in every
-style and pace, not only the pencil sketches at Auto pace that the pack holds.
-
-Do not open an install with uploads on to other people. It has no accounts:
-everyone who can reach it sees every book, and spends your key.
+Imagine-Reader is made for one person on their own computer. It has no
+accounts, so do not open it to other people: everyone who can reach it sees
+every book, and spends your keys.
 
 ### The sample pack
 
@@ -292,7 +279,7 @@ repository, so the recordings match their sentences. Turn it off with
 URL or file path, and `IR_SAMPLE_PACK_SHA256` to its SHA-256 (or leave that
 empty to skip the check).
 
-To make a pack, prepare the samples with keys (`IR_PREPARE_SAMPLES=true`),
+To make a pack, prepare the samples with your key (`IR_PREPARE_SAMPLES=true`),
 then run this with the reader's data folder:
 
 ```bash
@@ -367,13 +354,7 @@ Chrome, the way Google Docs prints it.
 | `reader/` | The web reader |
 | `fixtures/` | The sample story, the PDF generator, and the generated PDFs with their ground truth |
 | `tools/` | Scripts that built the samples and the sample pack |
-| `docs/` | The study build's guide, and images for this README |
-
-### The study build
-
-[docs/study.md](docs/study.md) describes the study build, for running the
-reading study: fixed passages, a console for the researcher, and an
-interaction log.
+| `docs/` | Images for this README |
 
 ## Roadmap
 
@@ -439,4 +420,5 @@ you agree that your contributions are licensed under it too.
   Icons: Lucide (ISC).
 - The voices are made with Google's Gemini models, the pictures with Black
   Forest Labs' FLUX.2 [klein], and the story planning and voice checks with
-  OpenAI's models. They are labelled as AI-generated wherever they appear.
+  OpenAI's models, reached through OpenRouter (and Cloudflare, for pictures,
+  when it is set). They are labelled as AI-generated wherever they appear.

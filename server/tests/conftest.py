@@ -12,13 +12,7 @@ FIXTURES = Path(__file__).resolve().parents[2] / "fixtures" / "pdfs"
 @pytest.fixture(autouse=True)
 def no_real_ai(monkeypatch):
     """Tests never reach a real AI service, whatever the developer's environment holds."""
-    for key in (
-        "OPENROUTER_API_KEY",
-        "OPENAI_API_KEY",
-        "GEMINI_API_KEY",
-        "CLOUDFLARE_ACCOUNT_ID",
-        "CLOUDFLARE_API_TOKEN",
-    ):
+    for key in ("OPENROUTER_API_KEY", "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"):
         monkeypatch.delenv(key, raising=False)
         monkeypatch.delenv(f"IR_{key}", raising=False)
     monkeypatch.setenv("IR_SAMPLES", "false")  # the samples have their own tests (test_sample.py)

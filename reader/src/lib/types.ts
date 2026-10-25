@@ -88,18 +88,17 @@ export interface NarrationManifest {
   error_code: string | null; // why preparation last stopped early
 }
 
-/** Who makes what with the keys set: openrouter, gemini, openai, cloudflare; or none yet. */
+/** Who makes what: OpenRouter with the key, and Cloudflare for the pictures with its account; else placeholders. */
 export interface Services {
-  planning: "openrouter" | "openai" | "rules";
-  voice: "openrouter" | "gemini" | "openai" | "placeholders" | "none";
-  pictures: "cloudflare" | "openrouter" | "openai" | "placeholders";
+  planning: "openrouter" | "rules";
+  voice: "openrouter" | "placeholders";
+  pictures: "openrouter" | "cloudflare" | "placeholders";
 }
 
 /** What the reader should know: who makes the voice and pictures, the choices, and the limits. */
 export interface ServiceInfo {
   ai_status: "ok" | "daily_limit" | "unavailable"; // whether voice and pictures can be made now (unavailable: a key refused)
   services: Services;
-  uploads: boolean; // off on a public demo that offers only the samples
   max_upload_mb: number;
   max_pages: number;
   daily_limit_usd: number;
@@ -109,7 +108,6 @@ export interface ServiceInfo {
   picture_words: number[]; // how often a new picture may appear, in words (0: Auto)
   default_style: string;
   default_words: number;
-  study: boolean; // the study build: its console is at #/study
 }
 
 export interface SceneImage {
@@ -152,65 +150,4 @@ export interface Reading {
   start_section: string | null;
   narration_style: "story" | "plain";
   language?: string; // "en", "bn", …
-}
-
-/** A study session: its passage and pictures are fixed when it starts (server study.py). */
-export interface StudySession {
-  id: string;
-  kind: "study" | "practice" | "benchmark";
-  participant: number | null;
-  session: number | null; // 1 to 4, for a study session
-  attempt: number; // 2 or more when the same session was started again
-  label: string | null; // names a benchmark run
-  passage: string; // A to D, "practice", or "benchmark"
-  book_id: string;
-  style: string;
-  words: number;
-  block: number | null;
-  slot: number | null;
-  column: number | null;
-  locked: boolean; // the pictures cannot be changed while reading
-  created_at: string;
-  models: Record<string, string>;
-}
-
-/** How far one setting of a passage's pictures is prepared. */
-export interface PlanReadiness {
-  style: string;
-  words: number;
-  scenes: number;
-  ready: number;
-  refused: number; // declined in every style: the previous picture stays on screen
-  fallbacks: number; // drawn in another style than asked
-  complete: boolean;
-}
-
-export interface PassageReadiness {
-  book_id: string;
-  status: string; // missing, queued, processing, failed, or ready
-  narration: { ready: number; planned: number; complete: boolean } | null;
-  plans: PlanReadiness[];
-}
-
-/** The study console's view of the build and its passages (GET /api/study). */
-export interface StudyOverview {
-  build: string;
-  narration: string;
-  pictures: string;
-  visual_bible: string;
-  styles: string[];
-  frequencies: number[];
-  practice: PassageReadiness & { passage: string; style: string; words: number };
-  passages: (PassageReadiness & { letter: string })[];
-}
-
-/** One of a participant's four sessions, from the schedule. */
-export interface ScheduledSession {
-  session: number;
-  passage: string;
-  style: string;
-  words: number;
-  block: number;
-  slot: number;
-  column: number;
 }

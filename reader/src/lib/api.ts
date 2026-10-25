@@ -1,15 +1,5 @@
 import type { PictureChoice } from "../reading/pictures";
-import type { StudyEvent } from "../study/study";
-import type {
-  Book,
-  NarrationManifest,
-  Reading,
-  ScheduledSession,
-  ServiceInfo,
-  SketchManifest,
-  StudyOverview,
-  StudySession,
-} from "./types";
+import type { Book, NarrationManifest, Reading, ServiceInfo, SketchManifest } from "./types";
 
 export class ApiError extends Error {
   constructor(
@@ -69,30 +59,4 @@ export const api = {
     form.append("words", String(choice.words));
     return request<Book>("/api/books", { method: "POST", body: form });
   },
-
-  // The study build (docs/study.md).
-  studyOverview: () => request<StudyOverview>("/api/study"),
-  studySchedule: (participant: number) => request<ScheduledSession[]>(`/api/study/schedule?participant=${participant}`),
-  startStudySession: (body: {
-    kind: StudySession["kind"];
-    participant?: number;
-    session?: number;
-    book_id?: string;
-    style?: string;
-    words?: number;
-    label?: string;
-  }) =>
-    request<StudySession>("/api/study/sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }),
-  studySession: (id: string) => request<StudySession>(`/api/study/sessions/${id}`),
-  studyEventsUrl: (id: string) => `/api/study/sessions/${id}/events`,
-  logStudyEvents: (id: string, events: StudyEvent[]) =>
-    request<void>(`/api/study/sessions/${id}/events`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ events }),
-    }),
 };

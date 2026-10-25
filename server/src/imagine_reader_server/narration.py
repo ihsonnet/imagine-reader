@@ -9,12 +9,10 @@ spending limit stop preparation before they would be exceeded. Logs carry ids
 and counts, never book text.
 """
 
-import json
 import logging
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import case, or_, select, update
@@ -33,17 +31,13 @@ from imagine_reader.narration import (
 )
 from imagine_reader.providers import (
     ClipChecker,
-    GeminiSentenceTimer,
     GeminiSpeechProvider,
     MockSpeechProvider,
-    OpenAISpeechProvider,
-    OpenAITranscriber,
     OpenRouterSentenceTimer,
     OpenRouterSpeechProvider,
     OpenRouterTranscriber,
     ProviderAccountError,
     ProviderBusy,
-    ProviderQuotaExhausted,
     ProviderRefused,
     SpeechProvider,
     measure_duration,
@@ -69,81 +63,25 @@ class UnknownVoice(Exception):
 
 # The language as Gemini's style names it ("a warm native Bengali storyteller"); any other book's style names none.
 GEMINI_LANGUAGES = {"bn": "Bengali", "en": "English"}
-QUOTA = "voice-quota.json"  # in the data folder: Gemini models whose requests are used up, and until when
 
 
 def speech_provider(settings: Settings, language: str = "", voice: str | None = None) -> SpeechProvider:
     """The narrator for books in this language ("bn", "en", or "" for the rest): Gemini's storyteller, through
-    OpenRouter or with a Gemini key, even on a day its requests are used up (the reading waits for them; it never
-    goes on in another voice). OpenAI's narrator when chosen, or for one of its own voices; placeholders without a
-    key. With ``voice``, the narrator that owns that voice."""
-    choice = settings.speech_provider
-    if choice == "auto":
-        gemini = settings.openrouter_api_key or settings.gemini_api_key
-        choice = "gemini" if gemini else "openai" if settings.openai_api_key else "mock"
-    if voice in OpenAISpeechProvider.voices and voice not in GeminiSpeechProvider.voices:
-        choice = "openai"  # the narrator that owns this voice
-    elif voice in GeminiSpeechProvider.voices:
-        choice = "gemini"
-    if choice == "gemini":
+    OpenRouter. Placeholders without a key, except for Gemini's own voice (the samples', which come ready-made):
+    anything new in it waits for a key, never going on in another voice."""
+    if settings.ai or voice in GeminiSpeechProvider.voices:
         return _gemini(settings, language)
-    if choice == "openai":
-        if not settings.openai_api_key:
-            raise ValueError("OpenAI's narrator needs OPENAI_API_KEY")
-        return OpenAISpeechProvider(
-            settings.openai_api_key.get_secret_value(),
-            model=settings.openai_speech_model,
-            default_voice=settings.openai_speech_voice,
-            usd_per_million_characters=settings.speech_usd_per_million_characters,
-        )
-    if choice == "mock":
-        return MockSpeechProvider()
-    raise ValueError(f"unknown speech provider {choice!r}")
+    return MockSpeechProvider()
 
 
 def _gemini(settings: Settings, language: str) -> GeminiSpeechProvider:
     """Gemini's storyteller for this language: Flash-Lite for Bangla, Flash for the rest; each run's clips heard."""
     model = settings.bangla_speech_model if language == "bn" else settings.english_speech_model
     name = GEMINI_LANGUAGES.get(language, "")
-    checker = _checker(settings, language)
-    if settings.openrouter_api_key:
-        key = settings.openrouter_api_key.get_secret_value()
-        timer = OpenRouterSentenceTimer(key, settings.timing_model)
-        return OpenRouterSpeechProvider(key, model, settings.speech_voice, name, timer=timer, checker=checker)
-    # Without a key, one that cannot be asked: the samples' voice comes ready-made, and anything new waits for a key.
-    key = settings.gemini_api_key.get_secret_value() if settings.gemini_api_key else ""
-    timer = GeminiSentenceTimer(key, settings.timing_model)
-    return GeminiSpeechProvider(key, model, settings.speech_voice, name, timer=timer, checker=checker)
-
-
-def _checker(settings: Settings, language: str) -> ClipChecker | None:
-    """Hears each clip of a run, so a misplaced cut is read again: through OpenRouter, or OpenAI's own key."""
-    if settings.openrouter_api_key:
-        transcriber = OpenRouterTranscriber(settings.openrouter_api_key.get_secret_value(), settings.transcribe_model)
-    elif settings.openai_api_key:
-        transcriber = OpenAITranscriber(settings.openai_api_key.get_secret_value(), settings.transcribe_model)
-    else:
-        return None
-    return ClipChecker(transcriber, language or None)
-
-
-def quota_used_up(settings: Settings, model: str) -> bool:
-    """Whether this Gemini model's requests for today are used up (shared by the API and the worker)."""
-    try:
-        until = json.loads((settings.data_dir / QUOTA).read_text(encoding="utf-8")).get(model)
-    except (OSError, ValueError):
-        return False
-    return until is not None and datetime.fromisoformat(until) > datetime.now(UTC)
-
-
-def mark_quota_used_up(settings: Settings, model: str, seconds: float) -> None:
-    path = settings.data_dir / QUOTA
-    try:
-        used = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        used = {}
-    used[model] = (datetime.now(UTC) + timedelta(seconds=seconds + 60)).isoformat()
-    storage.write_json(path, used)
+    key = settings.openrouter_api_key.get_secret_value() if settings.openrouter_api_key else ""
+    checker = ClipChecker(OpenRouterTranscriber(key, settings.transcribe_model), language or None) if key else None
+    timer = OpenRouterSentenceTimer(key, settings.timing_model)
+    return OpenRouterSpeechProvider(key, model, settings.speech_voice, name, timer=timer, checker=checker)
 
 
 def book_speech_provider(settings: Settings, book_id: str, voice: str | None = None) -> SpeechProvider:
@@ -157,12 +95,6 @@ def section_voice(settings: Settings, book: Book, section_id: str) -> str:
     if book.shared:
         return settings.speech_voice
     return resolve_voice(settings, None, book.id)
-
-
-def voice_waits_today(settings: Settings, book: Book) -> bool:
-    """Whether this book's narrator (Gemini, with its own key) has used up today's requests: it waits for tomorrow."""
-    provider = book_speech_provider(settings, book.id)
-    return isinstance(provider, GeminiSpeechProvider) and quota_used_up(settings, provider.model)
 
 
 def resolve_voice(settings: Settings, voice: str | None, book_id: str | None = None) -> str:
@@ -308,27 +240,7 @@ def run_job(engine: Engine, settings: Settings, job_id: int, book_id: str, param
     paragraph_ends = {
         item.sentence_id for item in _plan(view, params["section_id"], style) if item.pause_after > sentence_pause
     }
-    if isinstance(provider, GeminiSpeechProvider) and quota_used_up(settings, provider.model):
-        outcome = ("failed", "voice_quota")  # known to be used up today: nothing is sent
-    else:
-        outcome = _Recording(
-            engine, settings, provider, style, job_id, book_id, params, audio_dir, runs, paragraph_ends
-        ).run()
-    if outcome == ("failed", "voice_quota"):
-        # The reading waits for Gemini's requests to reset, never going on in another voice: what is ready plays,
-        # and asking again once they reset records the rest.
-        with Session(engine) as db, db.begin():
-            db.execute(
-                update(NarrationClip)
-                .where(
-                    NarrationClip.book_id == book_id,
-                    NarrationClip.section_id == params["section_id"],
-                    NarrationClip.voice == params["voice"],
-                    NarrationClip.status.in_(_UNFINISHED),
-                )
-                .values(status="skipped", error_code="voice_quota")
-            )
-    return outcome
+    return _Recording(engine, settings, provider, style, job_id, book_id, params, audio_dir, runs, paragraph_ends).run()
 
 
 class _Recording:
@@ -482,19 +394,8 @@ class _Recording:
             for clip_id, *_ in clips:
                 self._update(clip_id, status="failed", error_code="refused", give_up=True)
             return
-        except ProviderQuotaExhausted as used_up:
-            log.warning("%s has no requests left today; reset in %.0f s", self.provider.id, used_up.retry_after)
-            mark_quota_used_up(self.settings, self.provider.model, used_up.retry_after)
-            for clip_id, *_ in clips:
-                self._update(clip_id, attempts=-1)
-            with self.lock:
-                self._stop(("failed", "voice_quota"))
-            return
         except ProviderAccountError:
-            log.error(
-                "speech provider %s refused the account or its quota is used up; check its key and billing",
-                self.provider.id,
-            )
+            log.error("speech provider %s refused the key; check it and its credit on OpenRouter", self.provider.id)
             for clip_id, *_ in clips:
                 self._update(clip_id, attempts=-1)
             with self.lock:

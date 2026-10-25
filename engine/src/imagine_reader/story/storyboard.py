@@ -36,7 +36,7 @@ from .sketching import visible_bible
 
 _CARRIED = "clothes, and anything they always carry"
 assert _CARRIED in CAST_INSTRUCTIONS
-BOOK_CHARACTERS = 12  # the people a whole book's reading lists (a novel has more than the study's 8)
+BOOK_CHARACTERS = 12  # the people a whole book's reading lists (a novel has more than the 8 a passage's cast does)
 _EIGHT = "at most 8, the ones who appear most"
 assert _EIGHT in CAST_INSTRUCTIONS
 BOOK_INSTRUCTIONS = (

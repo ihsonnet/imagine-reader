@@ -39,12 +39,10 @@ def test_upload_process_read_and_delete_a_book(client, app, settings):
     assert not storage.book_dir(settings, book["id"]).exists()
 
 
-def test_a_public_demo_offers_only_its_samples(tmp_path):
-    demo = Settings(_env_file=None, data_dir=tmp_path / "data", uploads=False)
-    client = TestClient(create_app(demo))
-    assert client.get("/api/info").json()["uploads"] is False
-    response = upload(client)
-    assert response.status_code == 403 and "samples only" in response.json()["detail"]
+def test_pages_carry_security_headers(client):
+    headers = client.get("/api/health").headers
+    assert "frame-ancestors 'none'" in headers["content-security-policy"]
+    assert headers["x-frame-options"] == "DENY"
 
 
 def test_rejects_files_that_are_not_pdfs(client, settings):

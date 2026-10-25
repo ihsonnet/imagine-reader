@@ -1,17 +1,16 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import type { SceneImage, SketchManifest } from "../lib/types";
+import type { SketchManifest } from "../lib/types";
 
 interface Props {
   manifest: SketchManifest | null;
   activeOrder: number;
   error: string | null;
   waitForPictures: boolean;
-  onWaitChange?: (wait: boolean) => void; // left out when the reader may not change it (a study session)
+  onWaitChange: (wait: boolean) => void;
   options: ReactNode; // the picture style and how often pictures change
   bookTitle: string; // shown small beside the logo in the picture's corner
   sample: boolean; // a sample's pictures come ready-made, never placeholders
   resizer: ReactNode; // a handle under the picture for making it larger or smaller
-  onShown?: (scene: SceneImage) => void; // a new picture appeared (the study's log)
 }
 
 const PRELOAD = 4; // pictures fetched ahead of the reader
@@ -39,7 +38,7 @@ function drift(url: string): number {
  */
 export function SketchPanel(props: Props) {
   const { manifest, activeOrder, error, waitForPictures, onWaitChange, options, bookTitle, resizer } = props;
-  const { sample, onShown } = props;
+  const { sample } = props;
   const scene = manifest?.scenes.find((s) => s.first_sentence <= activeOrder && activeOrder <= s.last_sentence);
   const [layers, setLayers] = useState<Shown[]>([]); // the previous picture, then the current one
   const shown = layers.at(-1) ?? null;
@@ -48,7 +47,6 @@ export function SketchPanel(props: Props) {
     if (scene?.image_url && scene.image_url !== shown?.url) {
       const next = { url: scene.image_url, caption: scene.caption };
       setLayers((now) => [...now.filter((layer) => layer.url !== next.url).slice(-1), next]);
-      onShown?.(scene);
     }
   }, [scene?.image_url, scene?.caption, shown]);
 
@@ -103,12 +101,10 @@ export function SketchPanel(props: Props) {
       {resizer}
       <div className="sketch-meta">
         <span role="status">{note}</span>
-        {onWaitChange && (
-          <label>
-            <input type="checkbox" checked={waitForPictures} onChange={(event) => onWaitChange(event.target.checked)} />
-            Wait for each picture
-          </label>
-        )}
+        <label>
+          <input type="checkbox" checked={waitForPictures} onChange={(event) => onWaitChange(event.target.checked)} />
+          Wait for each picture
+        </label>
       </div>
       {options}
     </section>
