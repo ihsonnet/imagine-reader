@@ -13,7 +13,7 @@ English and Bangla. Open source, and it runs on your own computer.
 **[Try the sample books](https://imagine-reader.ihsonnet.com)** in your
 browser: no sign-up, no key.
 
-![The reader with A Room with a View: the book's chapters on the left, the PDF page with the current sentence highlighted, and a pencil sketch of the scene above the text](docs/images/reader.webp)
+![The reader with the sample The Lantern Keeper: the PDF page with the sentence being read highlighted, and beside it a colour picture of Nora and her grandfather at the lighthouse, above the same text with the same sentence highlighted](docs/images/reader.webp)
 
 ## What it does
 
@@ -141,9 +141,8 @@ checks. If Imagine-Reader is useful to you, a ⭐ helps others find it.
   *দেবদাস* (Sarat Chandra Chattopadhyay, 1917) and *কাবুলিওয়ালা* (Rabindranath
   Tagore, 1892) are in the public domain, from Bangla Wikisource
   ([sources](server/src/imagine_reader_server/samples/SOURCES.md)).
-- **Screenshots** show *A Room with a View* (E. M. Forster, 1908, Standard
-  Ebooks) and *Alice's Adventures in Wonderland* (Lewis Carroll), both in the
-  public domain.
+- **Example pictures** are drawn from *Alice's Adventures in Wonderland*
+  (Lewis Carroll), in the public domain.
 - **Fonts and icons.** Literata, Atkinson Hyperlegible, Caveat, Cabin Sketch
   and the Noto Bengali fonts are under the SIL Open Font License. Lucide
   icons are under ISC.
