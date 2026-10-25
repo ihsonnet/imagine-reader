@@ -90,6 +90,20 @@ docker compose up -d --build
   | `reading/` | The reader: the PDF page, narration, pictures, and their choices |
 
   Tests sit next to the files they test, as `name.test.ts`.
+- `fixtures/`: a public-domain story laid out as PDFs (single and two
+  columns, rotated, cropped, a paperback page, a scan), each with a
+  ground-truth file the engine's tests check against. `generate_pdfs.py`
+  makes them, and `generate_shaped_pdf.py` prints a Bangla page the way
+  Google Docs does.
+- `tools/`: the scripts that made the samples and the sample pack.
+- `docs/`: [how it works](docs/how-it-works.md), and the README's images.
+
+The database schema is managed with Alembic and upgraded on startup. After
+you change the models in `db.py`, add a migration:
+
+```bash
+.venv/bin/alembic -c server/alembic.ini revision --autogenerate -m "describe the change"
+```
 
 ## Before you open a pull request
 
