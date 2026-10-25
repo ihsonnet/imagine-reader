@@ -64,8 +64,10 @@ tracking, and the reader only answers on your own computer.
 
 ## What it costs
 
-You pay the model providers directly, at their list prices. One hour of
-narrated reading costs about:
+**You pay once per book.** The voice and pictures are made the first time you
+listen, then kept, so reading a book again costs nothing. You pay the model
+providers directly, at their list prices. Making one hour of a book costs
+about:
 
 | | OpenRouter only | With Cloudflare for pictures |
 | --- | ---: | ---: |
@@ -74,7 +76,10 @@ narrated reading costs about:
 | Pictures | $2.22 | $0.49 |
 | **Total** | **$3.70** | **$1.95** |
 
-- **Read it again for free.** Every recording and picture is kept.
+- **Only what you listen to is made**, a little ahead of you. Stop after one
+  chapter, and you pay for about one chapter.
+- **A new picture style or pace** draws a new set of pictures, once.
+  Switching back to one you used before is free.
 - **Spending is capped.** `IR_DAILY_SPEND_LIMIT_USD` (default $5) limits what
   it spends each day. At the limit, the voice and pictures wait for the next
   day, with nothing cheaper standing in.
