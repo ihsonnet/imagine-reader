@@ -92,8 +92,9 @@ about:
 
 ```
 PDF ─► text, reading order, sentences, highlight boxes
-         ├─► voice: Gemini reads a paragraph at a time, cut and checked sentence by sentence
-         └─► story bible (whole book) ─► storyboard (each chapter) ─► pictures (FLUX.2 [klein])
+         ├─► voice:    Gemini reads aloud ─► Gemini times each sentence ─► OpenAI checks each cut
+         ├─► story:    OpenAI reads the whole book ─► storyboards each chapter
+         └─► pictures: FLUX.2 [klein] draws each scene of the storyboard
 ```
 
 A Python engine reads the PDF and plans the story. A FastAPI server and its
