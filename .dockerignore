@@ -1,0 +1,15 @@
+# Never send secrets, uploaded books, or local build output to the image build.
+.env
+.env.*
+!.env.example
+data/
+.git/
+.venv/
+**/node_modules/
+reader/dist/
+**/__pycache__/
+**/*.egg-info/
+.pytest_cache/
+.ruff_cache/
+fixtures/
+examples/
